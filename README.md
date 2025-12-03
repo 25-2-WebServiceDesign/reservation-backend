@@ -41,148 +41,149 @@
 </p>
 
 <details>
-<summary>ERD 코드</summary>
+<summary>dbdiagram.io ERD 전체 코드</summary>
 <div markdown="1">
 
-```sql
-ENUM WeekDays {
-  SUN
-  MON
-  TUE
-  WED
-  THU
-  FRI
-  SAT
-}
+- `dbdiagram.io` ERD 전체 코드
+    ```sql
+    ENUM WeekDays {
+        SUN
+        MON
+        TUE
+        WED
+        THU
+        FRI
+        SAT
+    }
 
-ENUM Role {
-  CUSTOMER
-  OWNER
-  ADMIN
-}
+    ENUM Role {
+        CUSTOMER
+        OWNER
+        ADMIN
+    }
 
-Enum ReservationStatus {
-  PENDING
-  CONFIRMED
-  CANCELED
-  COMPLETED
-}
+    Enum ReservationStatus {
+        PENDING
+        CONFIRMED
+        CANCELED
+        COMPLETED
+    }
 
-Table User {
-  uid varchar [pk]
+    Table User {
+        uid varchar [pk]
 
-  createdAt timestamp [not null, default: "now()"]
-  deletedAt timestamp [default: null]
-}
+        createdAt timestamp [not null, default: "now()"]
+        deletedAt timestamp [default: null]
+    }
 
-Table UserProfile {
-  uid varchar [pk, ref: < User.uid]
-  displayName varchar(20) [unique, not null]
-  email varchar(100) [unique]
-  phone varchar(20) [unique]
-  profileImage varchar [note: "s3 경로"]
-  role Role [not null, default: Role.CUSTOMER, note: "[CUSTOMER, OWNER, ADMIN]"]
+    Table UserProfile {
+        uid varchar [pk, ref: < User.uid]
+        displayName varchar(20) [unique, not null]
+        email varchar(100) [unique]
+        phone varchar(20) [unique]
+        profileImage varchar [note: "s3 경로"]
+        role Role [not null, default: Role.CUSTOMER, note: "[CUSTOMER, OWNER, ADMIN]"]
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+    }
 
-Table Store {
-  id integer [pk, increment]
-  name varchar(100) [not null]
-  address varchar(200) [not null]
-  phone varchar(20) [not null]
-  owner varchar [ref: < User.uid]
-  category varchar [note: "[숙소, 식당, 스토어] 중 택 1 추후 추가 가능"]
-  homepageURL varchar(200) [default: null]
-  detail varchar [note: "상세 페이지"]
+    Table Store {
+        id integer [pk, increment]
+        name varchar(100) [not null]
+        address varchar(200) [not null]
+        phone varchar(20) [not null]
+        owner varchar [ref: < User.uid]
+        category varchar [note: "[숙소, 식당, 스토어] 중 택 1 추후 추가 가능"]
+        homepageURL varchar(200) [default: null]
+        detail varchar [note: "상세 페이지"]
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+    }
 
-Table ReservationHourGroup {
-  id integer [pk, increment]
-  unitId integer [ref: < ReservationUnit.id, unique]
-  slotDuration integer [default: 30, note: "min 단위의 예약 단위 시간"]
-  maximumHeadcount integer [default: 1, note: "최대 예약 가능 수"]
-}
+    Table ReservationHourGroup {
+        id integer [pk, increment]
+        unitId integer [ref: < ReservationUnit.id, unique]
+        slotDuration integer [default: 30, note: "min 단위의 예약 단위 시간"]
+        maximumHeadcount integer [default: 1, note: "최대 예약 가능 수"]
+    }
 
-Table BusinessHour {
-  id integer [pk, increment]
-  groupId integer [ref: < ReservationHourGroup.id]
-  dayOfWeek WeekDays [note: "요일"]
-  openTime time [not null]
-  closeTime time [not null]
+    Table BusinessHour {
+        id integer [pk, increment]
+        groupId integer [ref: < ReservationHourGroup.id]
+        dayOfWeek WeekDays [note: "요일"]
+        openTime time [not null]
+        closeTime time [not null]
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+    }
 
-Table StoreClosedDay {
-  id integer [pk]
-  at date
-  storeId integer [ref: < Store.id]
-  reason varchar
-}
+    Table StoreClosedDay {
+        id integer [pk]
+        at date
+        storeId integer [ref: < Store.id]
+        reason varchar
+    }
 
-Table UnitClosedDay {
-  id integer [pk]
-  at date
-  unitId integer [ref: < ReservationUnit.id]
-  reason varchar
-}
+    Table UnitClosedDay {
+        id integer [pk]
+        at date
+        unitId integer [ref: < ReservationUnit.id]
+        reason varchar
+    }
 
-Table ReservationUnit {
-  id integer [pk, increment]
-  storeId integer [ref: < Store.id]
-  name varchar(100) [not null]
-  description text [not null]
-  profileImage varchar [note: "s3 혹은 이미지의 경로"]
-  detailURL varchar [default: null, note: "sns 경로 혹은 상세 페이지가 있다면 그 경로"]
+    Table ReservationUnit {
+        id integer [pk, increment]
+        storeId integer [ref: < Store.id]
+        name varchar(100) [not null]
+        description text [not null]
+        profileImage varchar [note: "s3 혹은 이미지의 경로"]
+        detailURL varchar [default: null, note: "sns 경로 혹은 상세 페이지가 있다면 그 경로"]
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+    }
 
-Table Reservation {
-  id integer [pk]
-  uid varchar [ref: < User.uid]
-  unitId integer [ref: < ReservationUnit.id]
-  startTime timestamp [not null]
-  endTime timestamp [not null]
-  memo text [note: "예약 세부사항"]
-  headcount integer [default: 1]
-  status ReservationStatus [note: "예약확인중, 예약됨, 취소됨, 완료됨"]
+    Table Reservation {
+        id integer [pk]
+        uid varchar [ref: < User.uid]
+        unitId integer [ref: < ReservationUnit.id]
+        startTime timestamp [not null]
+        endTime timestamp [not null]
+        memo text [note: "예약 세부사항"]
+        headcount integer [default: 1]
+        status ReservationStatus [note: "예약확인중, 예약됨, 취소됨, 완료됨"]
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+    }
 
-Table Review {
-  id integer [pk, increment]
-  uid varchar [ref: > User.uid]
-  reservationId integer [ref: > Reservation.id]
-  rating integer [not null, note: "0 ~ 10 까지의 점수"]
-  content text
+    Table Review {
+        id integer [pk, increment]
+        uid varchar [ref: > User.uid]
+        reservationId integer [ref: > Reservation.id]
+        rating integer [not null, note: "0 ~ 10 까지의 점수"]
+        content text
 
-  createdAt timestamp [not null, default: "now()"]
-  updatedAt timestamp [not null, default: "now()"]
-  deletedAt timestamp [default: null, note: "소프트 딜리트 시 사용"]
-}
+        createdAt timestamp [not null, default: "now()"]
+        updatedAt timestamp [not null, default: "now()"]
+        deletedAt timestamp [default: null, note: "소프트 딜리트 시 사용"]
+    }
 
-Table favorite {
-  uid varchar [ref: < User.uid]
-  storeId integer [ref: < Store.id]
+    Table favorite {
+        uid varchar [ref: < User.uid]
+        storeId integer [ref: < Store.id]
 
-  Indexes {
-    (uid, storeId) [unique]
-  }
+        Indexes {
+            (uid, storeId) [unique]
+        }
 
-  createdAt timestamp [not null, default: "now()"]
-  deletedAt timestamp [default: null, note: "소프트 딜리트 시 시간이 설정됨"]
-}
-```
+        createdAt timestamp [not null, default: "now()"]
+        deletedAt timestamp [default: null, note: "소프트 딜리트 시 시간이 설정됨"]
+    }
+    ```
 </div>
 </details>
 
