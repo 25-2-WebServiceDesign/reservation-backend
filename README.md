@@ -239,6 +239,19 @@ Table favorite {
 <summary>예약</summary>
 <div markdown="1">
 
+- 예약 관련 ERD
+    <p align="center">
+        <img src="./assets/ERD_Reservation.png" width=300>
+    </p>
+
+  - User Table
+    - 유저 관리 상세 참조
+  - ReservationUnit Table
+    - 가게 정보 상세 참조
+  - Reservation Table
+    - 예약 관리 테이블
+    - 시작 시간, 종료 시간을 지정하여 저장함
+    - memo 속성에서 예약 상세 정보를 저장할 수 있다
 
 </div>
 </details>
@@ -247,6 +260,18 @@ Table favorite {
 <summary>리뷰</summary>
 <div markdown="1">
 
+- 리뷰 관련 테이블
+    <p align="center">
+        <img src="./assets/ERD_Reviews.png" width=300>
+    </p>
+
+  - User Table
+    - 유저 관리 상세 참조
+  - Reservation Table
+    - 예약 관련 상세 참조
+  - Review
+    - 리뷰 관리하는 테이블
+    - 별점과 본문을 작성할 수 있다.
 
 </div>
 </details>
@@ -255,13 +280,25 @@ Table favorite {
 <summary>관심 가게</summary>
 <div markdown="1">
 
+- 관심 가게 관련 테이블
+    <p align="center">
+        <img src="./assets/ERD_Favorites.png" width=300>
+    </p>
+  - User Table
+    - 유저 관련 상세 참조
+  - Store Table
+    - 가게 정보 관련 상세 참조
+  - Favorite Table
+    - 가게 좋아요 정보
+    - 유저는 자주 예약하거나 가고싶은 가게를 저장할 수 있다.
 
 </div>
 </details>
 
 
 
-### 📘 테이블 간 관계 설명
+<!-- ### 📘 테이블 간 관계 설명 -->
+
 
 ## 4. API 설계
 ### 📙 REST API 규칙
