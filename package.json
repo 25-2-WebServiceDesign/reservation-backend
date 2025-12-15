@@ -1,0 +1,25 @@
+{
+  "name": "08_reservationservices",
+  "version": "1.0.0",
+  "description": "25-2 웹서비스설계 최종 프로젝트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/25-2-WebServiceDesign/reservation-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/25-2-WebServiceDesign/reservation-backend/issues"
+  },
+  "homepage": "https://github.com/25-2-WebServiceDesign/reservation-backend#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
