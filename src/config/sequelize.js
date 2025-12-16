@@ -11,6 +11,11 @@ const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
     host: DB_HOST,
     port: DB_PORT,
     dialect: "mysql",
+    logging: false,
+    define: {
+        underscored: true,
+        underscored: true,
+    }
 })
 
 module.exports = sequelize;

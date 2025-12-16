@@ -4,7 +4,8 @@
   "description": "25-2 웹서비스설계 최종 프로젝트",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node ./src/server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,9 @@
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "sqlite3": "^5.1.7"
   }
 }
