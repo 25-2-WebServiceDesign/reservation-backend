@@ -10,10 +10,20 @@ const Reservation = sequelize.define("Reservation", {
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: "users",
+            key: "id",
+        },
+        onDelete: "CASCADE",
     },
     unitId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: "reservation_units",
+            key: "id",
+        },
+        onDelete: "CASCADE",
     },
     startTime: {
         type: DataTypes.DATE,

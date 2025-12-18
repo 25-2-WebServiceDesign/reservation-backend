@@ -25,8 +25,7 @@ const OperatingHour = sequelize.define("OperatingHour", {
     },
 }, {
     timestamps: true,
-    updatedAt: false,
-    paranoid: true,
+    paranoid: false,
 })
 
 module.exports = OperatingHour;

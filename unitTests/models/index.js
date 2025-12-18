@@ -12,6 +12,7 @@ const OperatingHour = require("./OperatingHour");
 const StoreClosedDay = require("./StoreClosedDay");
 const UnitClosedDay = require("./UnitClosedDay");
 const Reservation = require("./Reservation");
+const Review = require("./Review");
 
 // 모델 간 관계 생성
 // User - RefreshToken
@@ -126,6 +127,18 @@ Store.belongsToMany(User, {
     otherKey: "userId",
 })
 
+// User - Review - Reservation
+User.belongsToMany(Reservation, {
+    through: Review,
+    foreignKey: "userId",
+    otherKey: "reservationId",
+})
+Reservation.belongsToMany(User, {
+    through: Review,
+    foreignKey: "reservationId",
+    otherKey: "userId",
+})
+
 module.exports = {
     sequelize,
     User,
@@ -139,4 +152,5 @@ module.exports = {
     StoreClosedDay,
     UnitClosedDay,
     Reservation,
+    Review,
 }
