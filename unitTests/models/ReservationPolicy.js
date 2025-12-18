@@ -17,7 +17,7 @@ const ReservationPolicy = sequelize.define("ReservationPolicy", {
         allowNull: false,
         defaultValue: 30,
     },
-    maximumHeadCount: {
+    maximumHeadcount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1,
