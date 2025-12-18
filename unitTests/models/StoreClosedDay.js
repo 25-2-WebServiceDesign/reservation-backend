@@ -8,7 +8,7 @@ const StoreClosedDay = sequelize.define("StoreClosedDay", {
         autoIncrement: true,
     },
     at: {
-        type: DataTypes.DATE,   // DATE (YYYY-MM-dd)
+        type: DataTypes.DATEONLY,   // DATE (YYYY-MM-dd)
         allowNull: false,
     },
     storeId: {
@@ -17,7 +17,7 @@ const StoreClosedDay = sequelize.define("StoreClosedDay", {
     },
     reason: {
         type: DataTypes.STRING,
-        defualt: "personal reason"
+        defaultValue: "personal reason"
     },
 }, {
     timestamps: false,

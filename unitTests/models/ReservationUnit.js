@@ -18,7 +18,6 @@ const ReservationUnit = sequelize.define("ReservationUnit", {
     description: {
         type: DataTypes.TEXT,
         allowNull: false,
-        defaultValue: this.name,
     },
     profileImage: {
         type: DataTypes.STRING,
