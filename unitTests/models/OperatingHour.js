@@ -12,7 +12,7 @@ const OperatingHour = sequelize.define("OperatingHour", {
         allowNull: false,
     },
     dayOfWeek: {
-        type: DataTypes.ENUM("SUN", "MON", "THU", "WED", "THU", "FRI", "SAT"),
+        type: DataTypes.ENUM("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"),
         allowNull: false,
     },
     openTime: {
