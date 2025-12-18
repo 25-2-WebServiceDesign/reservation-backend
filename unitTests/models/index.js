@@ -6,6 +6,7 @@ const RefreshToken = require("./RefreshToken");
 const UserAuth = require("./UserAuth")
 const Store = require("./Store");
 const ReservationUnit = require("./ReservationUnit");
+const Favorite = require("./Favorite");
 
 // 모델 간 관계 생성
 // User - RefreshToken
@@ -40,9 +41,28 @@ Store.hasMany(ReservationUnit, {
     foreignKey: "storeId",
     onDelete: "CASCADE",
 })
-ReservationUnit.belongsTo(Stroe, {
+ReservationUnit.belongsTo(Store, {
     foreignKey: "storeId",
 })
+
+// Favorite - User
+User.hasMany(Favorite, {
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+})
+Favorite.belongsTo(User, {
+    foreignKey: "userId",
+})
+// Favorite - Store
+Store.hasMany(Favorite, {
+    foreignKey: "storeId",
+    onDelete: "CASCADE",
+})
+Favorite.belongsTo(Store, {
+    foreignKey: "storeId",
+})
+
+
 
 
 module.exports = {
