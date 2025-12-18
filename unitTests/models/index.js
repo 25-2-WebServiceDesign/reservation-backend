@@ -8,6 +8,7 @@ const Store = require("./Store");
 const ReservationUnit = require("./ReservationUnit");
 const Favorite = require("./Favorite");
 const ReservationPolicy = require('./ReservationPolicy');
+const OperatingHour = require("./OperatingHour");
 
 // 모델 간 관계 생성
 // User - RefreshToken
@@ -72,6 +73,14 @@ ReservationPolicy.belongsTo(ReservationUnit, {
     foreignKey: "unitId",
 })
 
+// OperatingHour - ReservationPolicy
+ReservationPolicy.hasMany(OperatingHour, {
+    foreignKey: "policyId",
+    onDelete: "CASCADE",
+})
+OperatingHour.belongsTo(ReservationPolicy, {
+    foreignKey: "policyId",
+})
 
 
 
