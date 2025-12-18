@@ -7,6 +7,7 @@ const UserAuth = require("./UserAuth")
 const Store = require("./Store");
 const ReservationUnit = require("./ReservationUnit");
 const Favorite = require("./Favorite");
+const ReservationPolicy = require('./ReservationPolicy');
 
 // 모델 간 관계 생성
 // User - RefreshToken
@@ -61,6 +62,17 @@ Store.hasMany(Favorite, {
 Favorite.belongsTo(Store, {
     foreignKey: "storeId",
 })
+
+// ReservationPolicy - ReservationUnit
+ReservationUnit.hasOne(ReservationPolicy, {
+    foreignKey: "unitId",
+    onDelete: "CASCADE",
+}),
+ReservationPolicy.belongsTo(ReservationUnit, {
+    foreignKey: "unitId",
+})
+
+
 
 
 
