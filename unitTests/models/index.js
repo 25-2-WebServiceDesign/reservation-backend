@@ -10,6 +10,7 @@ const Favorite = require("./Favorite");
 const ReservationPolicy = require('./ReservationPolicy');
 const OperatingHour = require("./OperatingHour");
 const StoreClosedDay = require("./StoreClosedDay");
+const UnitClosedDay = require("./UnitClosedDay");
 
 // 모델 간 관계 생성
 // User - RefreshToken
@@ -103,6 +104,15 @@ StoreClosedDay.belongsTo(Store, {
     foreignKey: "storeId"
 })
 
+// UnitClosedDay - ReservationUnit
+ReservationUnit.hasMany(UnitClosedDay, {
+    foreignKey: "unitId",
+    onDelete: "CASCADE",
+})
+UnitClosedDay.belongsTo(ReservationUnit, {
+    foreignKey: "unitId"
+})
+
 
 
 module.exports = {
@@ -115,5 +125,6 @@ module.exports = {
     Favorite,
     ReservationPolicy,
     OperatingHour,
-    StoreClosedDay
+    StoreClosedDay,
+    UnitClosedDay,
 }
