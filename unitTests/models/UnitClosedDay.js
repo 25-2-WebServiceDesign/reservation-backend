@@ -25,7 +25,7 @@ const UnitClosedDay = sequelize.define("UnitClosedDay", {
     indexes: [
         {
             unique: true,
-            fields: ["unit_id, at"]
+            fields: ["unit_id", "at"]
         }
     ]
 })
