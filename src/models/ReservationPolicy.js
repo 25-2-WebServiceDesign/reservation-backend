@@ -1,30 +1,30 @@
 const sequelize = require("../config/sequelize");
 const {DataTypes} = require("sequelize");
 
-const RefreshToken = sequelize.define('RefreshToken', {
+const ReservationPolicy = sequelize.define("ReservationPolicy", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    userId: {
+    unitId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
     },
-    token: {
-        type: DataTypes.STRING,
+    slotDuration: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 30,
     },
-    expiresAt: {
-        type: DataTypes.DATE,
+    maximumHeadcount: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 1,
     },
-    revokedAt: {
-        type: DataTypes.DATE,
-        defaultValue: null
-    }
 }, {
     timestamps: false,
+    paranoid: false,
 })
 
-module.exports = RefreshToken
+module.exports = ReservationPolicy;

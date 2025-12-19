@@ -1,7 +1,7 @@
 const sequelize = require("../config/sequelize");
 const {DataTypes} = require("sequelize");
 
-const RefreshToken = sequelize.define('RefreshToken', {
+const UserAuth = sequelize.define("UserAuth", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -11,20 +11,23 @@ const RefreshToken = sequelize.define('RefreshToken', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    token: {
+    provider: {
+        type: DataTypes.ENUM("GOOGLE", "NAVER", "KAKAO"),
+        allowNull: false,
+    },
+    providerUid: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    expiresAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-    },
-    revokedAt: {
-        type: DataTypes.DATE,
-        defaultValue: null
     }
 }, {
     timestamps: false,
+    paranoid: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ["provider", 'provider_uid'],
+        }
+    ],
 })
 
-module.exports = RefreshToken
+module.exports = UserAuth;

@@ -30,7 +30,7 @@ const User = sequelize.define("User", {
             }
         }
     },
-    profile_image: {
+    profileImage: {
         type: DataTypes.STRING,
         validate: {
             isUrl: true,
@@ -43,11 +43,7 @@ const User = sequelize.define("User", {
     },
 }, {
     timestamps: true,
-    underscored: true,
     paranoid: true,
 })
 
-// User.sync({force: true});
-
 module.exports = User;
-
