@@ -62,7 +62,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             description: 수정/취소에 필요한 필드 전달 (예: status, time 등)
+ *             description: 수정/취소에 필요한 필드 전달 (예 - status, time 등)
  *     responses:
  *       200:
  *         description: 수정/취소 성공

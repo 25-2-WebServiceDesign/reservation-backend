@@ -9,7 +9,7 @@ const naverAuthRouter = require("./routes/authNaver.router");
 
 const storesRouter = require("./routes/stores.router");
 const unitsRouter = require("./routes/units.router");
-const storesRouter = require("./routes/stores.router");
+// const storesRouter = require("./routes/stores.router");
 const unitRouter = require("./routes/units.router");
 
 app.use(express.json());

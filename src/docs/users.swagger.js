@@ -29,7 +29,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             description: 수정할 필드만 전달 (예: nickname 등)
+ *             description: 수정할 필드만 전달 (예 - nickname 등)
  *     responses:
  *       200:
  *         description: 수정 성공
