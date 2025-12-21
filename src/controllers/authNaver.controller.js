@@ -6,7 +6,7 @@ const client_secret = process.env.NAVER_CLIENT_SECRET;
 const redirectURI = encodeURI(process.env.NAVER_CALLBACK_URL);
 
 
-const CustomError = require("../errors/customError")
+const CustomError = require("../responses/customError")
 
 module.exports = {
     getNaverLoginURL() {

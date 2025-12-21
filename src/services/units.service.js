@@ -1,20 +1,28 @@
-const unitsRepository = require("../repositories/units.repository");
+const { sequelize } = require("../models");
+const unitsRepository = require("../repositories/reservationUnit.repository");
 const storesRepository = require("../repositories/stores.repository");
-const AppError = require("../errors/AppError");
+const AppError = require("../responses/AppError");
 
 // Unit 생성 시 Store 존재 검증 필수
 
-exports.createUnit = async (data) => {
-  if (!data.storeId) {
-    throw new AppError("VALIDATION_ERROR", 400, "storeId is required");
-  }
+exports.createUnit = async (unitData) => {
+  const transaction = await sequelize.transaction();
 
-  const store = await storesRepository.findById(data.storeId);
-  if (!store) {
-    throw new AppError("NOT_FOUND", 404, "Store not found");
-  }
+  try {
+    const store = await storesRepository.findById(unitData.storeId, {transaction});
 
-  return unitsRepository.create(data);
+    if (!store) {
+      throw new AppError("NOT_FOUND", 404, "Store not found");
+    }
+
+    const newUnit = unitsRepository.create(unitData, {transaction});
+
+    await transaction.commit();
+    return newUnit;
+  } catch(err) {
+    await transaction.rollback();
+    throw err;
+  }
 };
 
 exports.getUnits = async () => {
@@ -29,22 +37,37 @@ exports.getUnitById = async (unitId) => {
   return unit;
 };
 
-exports.updateUnit = async (unitId, data) => {
-  const unit = await unitsRepository.findById(unitId);
-  if (!unit) {
-    throw new AppError("NOT_FOUND", 404, "Unit not found");
-  }
+exports.updateUnit = async (unitId, newData) => {
+  const transaction = await sequelize.transaction();
 
-  return unitsRepository.update(unitId, data);
+  try {
+    const unit = await unitsRepository.findById(unitId, {transaction});
+
+    if (!unit) {
+      throw new AppError("NOT_FOUND", 404, "Unit not found");
+    }
+    const [affected] = unitsRepository.update(unitId, newData, {transaction});
+
+    if (!affected) {
+      throw new AppError("NOT_FOUND", 404, "Unit not found"); 
+    }
+
+    const updatedUnit = await unitsRepository.findById(unitId, {transaction});
+
+    await transaction.commit();
+    return updatedUnit;
+  } catch(err) {
+    await transaction.rollback();
+    throw err;
+  }
 };
 
 exports.deleteUnit = async (unitId) => {
-  const unit = await unitsRepository.findById(unitId);
-  if (!unit) {
+  const affected = await unitsRepository.remove(unitId);
+
+  if (affected === 0) {
     throw new AppError("NOT_FOUND", 404, "Unit not found");
   }
-
-  await unitsRepository.remove(unitId);
 };
 
 function pick(obj, keys) {
