@@ -3,27 +3,35 @@ const unitsService = require("../services/units.service");
 exports.createUnit = async (req, res, next) => {
   try {
     const unit = await unitsService.createUnit(req.body);
-    res.status(201).json(unit);
+    return res.status(201).json(unit);
   } catch (err) {
     next(err);
   }
 };
 
 exports.getUnits = async (req, res, next) => {
+  const unitId = req.params.unitId;
+
+  if (!unitId) {
+    return res.status(400).json()
+  }
+
   try {
     const units = await unitsService.getUnits();
-    res.status(200).json(units);
+    return res.status(200).json(units);
   } catch (err) {
-    next(err);
+    // next(err);
+    return res.status(500).json()
   }
 };
 
 exports.getUnitById = async (req, res, next) => {
   try {
     const unit = await unitsService.getUnitById(req.params.unitId);
-    res.status(200).json(unit);
+    return res.status(200).json(unit);
   } catch (err) {
-    next(err);
+    // next(err);
+
   }
 };
 
@@ -63,6 +71,7 @@ exports.getUnitAvailability = async (req, res, next) => {
     const result = await unitsService.getUnitAvailability({ unitId, date });
     return res.status(200).json(result);
   } catch (err) {
-    next(err);
+    // next(err);
+    return res.status(500).json();
   }
 };
