@@ -1,6 +1,6 @@
 const { sequelize } = require("../models");
 const unitsRepository = require("../repositories/reservationUnit.repository");
-const storesRepository = require("../repositories/stores.repository");
+const storesRepository = require("../repositories/store.repository");
 const AppError = require("../responses/AppError");
 
 // Unit 생성 시 Store 존재 검증 필수

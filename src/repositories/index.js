@@ -1,27 +1,27 @@
-const user = require('./user.repository');
-const store = require('./store.repository');
-const reservation = require('./reservation.repository');
-const reservationUnit = require('./reservationUnit.repository');
-const operatingHour = require('./operatingHour.repository');
-const reservationPolicy = require('./reservationPolicy.repository');
-const favorite = require('./favorite.repository');
-const storeClosedDay = require('./storeClosedDay.repository');
-const unitClosedDay = require('./unitClosedDay.repository');
-const review = require('./review.repository');
-const refreshToken = require('./refreshToken.repository');
-const userAuth = require('./userAuth.repository');
+const userRepo = require('./user.repository');
+const storeRepo = require('./store.repository');
+const reservationRepo = require('./reservation.repository');
+const reservationUnitRepo = require('./reservationUnit.repository');
+const operatingHourRepo = require('./operatingHour.repository');
+const reservationPolicyRepo = require('./reservationPolicy.repository');
+const favoriteRepo = require('./favorite.repository');
+const storeClosedDayRepo = require('./storeClosedDay.repository');
+const unitClosedDayRepo = require('./unitClosedDay.repository');
+const reviewRepo = require('./review.repository');
+const refreshTokenRepo = require('./refreshToken.repository');
+const userAuthRepo = require('./userAuth.repository');
 
 module.exports = {
-  user,
-  store,
-  reservation,
-  reservationUnit,
-  operatingHour,
-  reservationPolicy,
-  favorite,
-  storeClosedDay,
-  unitClosedDay,
-  review,
-  refreshToken,
-  userAuth,
+  userRepo,
+  storeRepo,
+  reservationRepo,
+  reservationUnitRepo,
+  operatingHourRepo,
+  reservationPolicyRepo,
+  favoriteRepo,
+  storeClosedDayRepo,
+  unitClosedDayRepo,
+  reviewRepo,
+  refreshTokenRepo,
+  userAuthRepo,
 };

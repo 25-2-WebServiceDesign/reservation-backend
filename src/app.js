@@ -15,7 +15,7 @@ const unitRouter = require("./routes/units.router");
 app.use(express.json());
 
 // routers 연결
-app.use(naverAuthRouter)
+app.use("/auth/naver", naverAuthRouter)
 app.use("/stores", storesRouter);
 app.use("/units", unitsRouter);
 app.use("/api/stores", storesRouter);
