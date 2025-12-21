@@ -11,7 +11,7 @@ const router = express.Router();
 const Controller = require("../controllers/authNaver.controller")
 
 
-router.get('/login', (req, res) => {
+router.get('/auth/naver/login', (req, res) => {
     const apiUrl = Controller.getNaverLoginURL();
     // res.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
     // res.redirectURI(api_url)
