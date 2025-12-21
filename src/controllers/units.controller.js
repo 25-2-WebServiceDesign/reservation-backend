@@ -20,8 +20,7 @@ exports.getUnits = async (req, res, next) => {
     const units = await unitsService.getUnits();
     return res.status(200).json(units);
   } catch (err) {
-    // next(err);
-    return res.status(500).json()
+    next(err);
   }
 };
 
@@ -30,8 +29,7 @@ exports.getUnitById = async (req, res, next) => {
     const unit = await unitsService.getUnitById(req.params.unitId);
     return res.status(200).json(unit);
   } catch (err) {
-    // next(err);
-
+    next(err);
   }
 };
 
@@ -71,7 +69,6 @@ exports.getUnitAvailability = async (req, res, next) => {
     const result = await unitsService.getUnitAvailability({ unitId, date });
     return res.status(200).json(result);
   } catch (err) {
-    // next(err);
-    return res.status(500).json();
+    next(err);
   }
 };
