@@ -1,11 +1,13 @@
 /**
  * @swagger
- * /api/units/{id}:
+ * /units/{id}:
  *  patch:
  *      tags:
  *          - Units
  *      summary: 유닛 상세 정보 수정
- *      description: 유닛 상세 정보 수정
+ *      description: 유닛 상세 정보 수정 (owner)
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -33,11 +35,13 @@
 
 /**
  * @swagger
- * /api/units/{id}:
+ * /units/{id}:
  *  delete:
  *      tags:
  *          - Units
  *      summary: 유닛 삭제 (소프트)
+ *      security:
+ *          - bearerAuth: []
  *      description: 유닛 소프트 딜리트 (가게 소유자 혹은 그 이상의 사용자)
  *      parameters:
  *          - in: path
@@ -58,7 +62,7 @@
 
 /**
  * @swagger
- * /api/units/{id}:
+ * /units/{id}:
  *  get:
  *      tags:
  *          - Units
@@ -81,12 +85,14 @@
 
 /**
  * @swagger
- * /api/units/{id}/business-hours:
+ * /units/{id}/business-hours:
  *  post:
  *      tags:
  *          - Units
  *      summary: 유닛 운영시간 등록
  *      description: 유닛 운영시간 등록
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -115,11 +121,13 @@
 
 /**
  * @swagger
- * /api/units/{id}/business-hours:
+ * /units/{id}/business-hours:
  *  put:
  *      tags:
  *          - Units
  *      summary: 유닛 운영시간 재설정 (업데이트)
+ *      security:
+ *          - bearerAuth: []
  *      description: 유닛 운영시간을 재설정한다. (처음부터 다시 등록)
  *      parameters:
  *          - in: path
@@ -150,7 +158,7 @@
 
 /**
  * @swagger
- * /api/units/{id}/availability:
+ * /units/{id}/availability:
  *  get:
  *      tags:
  *          - Units
@@ -183,11 +191,13 @@
 
 /**
  * @swagger
- * /api/units/{id}/reservations:
+ * /units/{id}/reservations:
  *  post:
  *      tags:
  *          - Units
  *      summary: 예약 생성
+ *      security:
+ *          - bearerAuth: []
  *      description: 유닛에 대한 예약 생성 (사용자등급)
  *      parameters:
  *          - in: path
@@ -217,7 +227,7 @@
 
 /**
  * @swagger
- * /api/units/{id}/reviews:
+ * /units/{id}/reviews:
  *  get:
  *      tags:
  *          - Units

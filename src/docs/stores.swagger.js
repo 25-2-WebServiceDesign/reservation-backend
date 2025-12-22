@@ -32,9 +32,7 @@
  *      tags:
  *          - Stores
  *      summary: (모든 사용자) 모든 가게 조회
- *      description: 유저 등급 이상의 사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용
- *      security:
- *          - bearerAuth: []
+ *      description: 사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용
  *      responses:
  *          200:
  *              description: ok 가게 조회 성공
@@ -147,8 +145,6 @@
  *          - Stores
  *      summary: 가게 리뷰들 조회
  *      description: 가게의 리뷰들을 조회한다. (모든 사용자) - 추후 페이지네이션 적용 예정
- *      security:
- *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id

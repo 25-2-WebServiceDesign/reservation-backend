@@ -5,6 +5,8 @@
  *     tags:
  *       - Reservations
  *     summary: 나의 예약 현황 조회
+ *     security:
+ *       - bearerAuth: []
  *     description: 내 예약 목록을 조회한다.
  *     responses:
  *       200:
@@ -23,6 +25,8 @@
  *       - Reservations
  *     summary: 예약 상세 조회
  *     description: 예약 단건 상세 정보를 조회한다.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -49,6 +53,8 @@
  *       - Reservations
  *     summary: 예약 수정/취소
  *     description: 예약 정보를 수정하거나 취소한다.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -83,6 +89,8 @@
  *     tags:
  *       - Reservations
  *     summary: 예약 상태 변경
+ *     security:
+ *       - bearerAuth: []
  *     description: 예약 상태를 변경한다. (owner 권한 등 정책에 따라 제한)
  *     parameters:
  *       - in: path
@@ -125,7 +133,9 @@
  *     tags:
  *       - Reservations
  *     summary: 리뷰 추가
- *     description: 예약이 완료 상태인 경우에만 리뷰를 작성한다.
+ *     security:
+ *       - bearerAuth: []
+ *     description: 예약이 완료 상태인 경우에만 리뷰를 작성한다. (리뷰의 사용자만 작성 가능)
  *     parameters:
  *       - in: path
  *         name: id
