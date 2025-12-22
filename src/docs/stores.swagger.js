@@ -1,11 +1,13 @@
 /**
  * @swagger
- * /api/stores:
+ * /stores:
  *   post:
  *     tags:
  *       - Stores
  *     summary: 가게 등록
  *     description: 가게를 등록한다. OWNER 사용자 등급 필요
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -25,12 +27,14 @@
 
 /**
  * @swagger
- * /api/stores:
+ * /stores:
  *  get:
  *      tags:
  *          - Stores
  *      summary: (모든 사용자) 모든 가게 조회
  *      description: 유저 등급 이상의 사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용
+ *      security:
+ *          - bearerAuth: []
  *      responses:
  *          200:
  *              description: ok 가게 조회 성공
@@ -38,12 +42,14 @@
 
 /**
  * @swagger
- * /api/stores/me:
+ * /stores/me:
  *  get:
  *      tags:
  *          - Stores
  *      summary: 본인 가게들 조회
  *      description: OWNER 사용자가 본인의 가게들을 조회함
+ *      security:
+ *          - bearerAuth: []
  *      responses:
  *          200:
  *              description: ok 가게 조회 성공
@@ -55,12 +61,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}:
+ * /stores/{id}:
  *  get:
  *      tags:
  *          - Stores
  *      summary: 가게 상세 조회
  *      description: 가게 상세 조회
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -78,12 +86,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/units:
+ * /stores/{id}/units:
  *  get:
  *      tags:
  *          - Stores
  *      summary: 가게 유닛들 조회
  *      description: 가게 유닛들 조회 - 추후 페이지네이션 적용
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -101,12 +111,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/reservations:
+ * /stores/{id}/reservations:
  *  get:
  *      tags:
  *          - Stores
  *      summary: 가게 예약 조회
  *      description: 가게의 예약을 조회한다. (OWNER & 소유자 혹은 그 이상의 사용자) - 추후 페이지네이션 적용 예정
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -129,12 +141,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/reviews:
+ * /stores/{id}/reviews:
  *  get:
  *      tags:
  *          - Stores
  *      summary: 가게 리뷰들 조회
  *      description: 가게의 리뷰들을 조회한다. (모든 사용자) - 추후 페이지네이션 적용 예정
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -156,12 +170,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/units:
+ * /stores/{id}/units:
  *  post:
  *      tags:
  *          - Stores
  *      summary: 예약 유닛 추가
  *      description: 예약을 할 수 있는 유닛 추가
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -190,11 +206,13 @@
 
 /**
  * @swagger
- * /api/stores/{id}:
+ * /stores/{id}:
  *   patch:
  *     tags:
  *       - Stores
  *     summary: 가게정보 업데이트
+ *     security:
+ *        - bearerAuth: []
  *     description: 가게 정보 업데이트 (OWNER & 소유자 이상 등급 필요)
  *     parameters:
  *       - in: path
@@ -223,11 +241,13 @@
 
 /**
  * @swagger
- * /api/stores/{id}:
+ * /stores/{id}:
  *   delete:
  *     tags:
  *       - Stores
  *     summary: 가게 삭제 (소프트)
+ *     security:
+ *       - bearerAuth: []
  *     description: 가게 소프트 딜리트 (OWNER & 소유자 혹은 그 이상의 등급)
  *     parameters:
  *       - in: path
@@ -250,12 +270,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/favorites:
+ * /stores/{id}/favorites:
  *  post:
  *      tags:
  *          - Stores
  *      summary: 관심 가게 추가
  *      description: 관심 가게로 추가한다. (모든 사용자)
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -275,12 +297,14 @@
 
 /**
  * @swagger
- * /api/stores/{id}/favorites:
+ * /stores/{id}/favorites:
  *  delete:
  *      tags:
  *          - Stores
  *      summary: 관심 가게 삭제 (소프트)
  *      description: 괌심 가게 소프트 삭제
+ *      security:
+ *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id

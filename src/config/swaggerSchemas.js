@@ -1,16 +1,12 @@
-module.exports = {
-    GetOneUser: {
+const requestForm = (data, meta = {}) => {
+    return {
         type: "object",
         properties: {
-            data: {
-                type: "object",
-                properties: {
-                    user: { $ref: "#/components/schemas/User" },
-                }
-            },
+            data: data,
             meta: {
                 type: 'object',
                 properties: {
+                    ...meta,
                     timestamp: {
                         type: "string",
                         description: "응답 시간 iso format",
@@ -19,7 +15,37 @@ module.exports = {
                 }
             }
         }
-    },
+    }
+};
+
+module.exports = {
+    GetAllReviews: requestForm(
+        {
+            type: "object",
+            properties: {
+                reviews: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Review" }
+                }
+            }
+        }
+    ),
+    GetOneReview: requestForm(
+        {
+            type: "object",
+            properties: {
+                review: {$ref: "#/components/schemas/Review"}
+            }
+        }
+    ),
+    GetOneUser: requestForm(
+        {
+            type: "object",
+            properties: {
+                user: { $ref: "#/components/schemas/User" },
+            }
+        }
+    ),
     StandardError: {
         type: "object",
         properties: {

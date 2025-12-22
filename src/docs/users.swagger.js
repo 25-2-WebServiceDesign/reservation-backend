@@ -75,10 +75,16 @@
  *     tags:
  *       - Users
  *     summary: 내 리뷰 확인
+ *     security:
+ *       - bearerAuth: []
  *     description: 내가 작성한 리뷰 목록을 조회한다. (페이지네이션 가능)
  *     responses:
  *       200:
  *         description: 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/GetAllReviews"
  *       401:
  *         description: 인증 필요
  *       500:
@@ -92,6 +98,8 @@
  *     tags:
  *       - Users
  *     summary: 관심가게 조회
+ *     security:
+ *       - bearerAuth: []
  *     description: 내가 즐겨찾기한 가게 목록을 조회한다.
  *     responses:
  *       200:
