@@ -1,4 +1,6 @@
 const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerSchemaModels = require("./swaggerSchemaModels");
+const swaggerSchemas = require("./swaggerSchemas")
 
 const options = {
     definition: {
@@ -22,7 +24,8 @@ const options = {
                 },
             },
             schemas: {
-
+                ...swaggerSchemas,
+                ...swaggerSchemaModels
             },
         },
     },

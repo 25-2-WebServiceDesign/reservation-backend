@@ -5,6 +5,8 @@
  *     tags:
  *       - Users
  *     summary: 프로필 정보 확인
+ *     security:
+ *       - bearerAuth: []
  *     description: 내 프로필 정보를 조회한다.
  *     responses:
  *       200:
@@ -22,6 +24,8 @@
  *     tags:
  *       - Users
  *     summary: 프로필 정보 수정
+ *     security:
+ *       - bearerAuth: []
  *     description: 내 프로필 정보를 수정한다.
  *     requestBody:
  *       required: true
@@ -33,6 +37,10 @@
  *     responses:
  *       200:
  *         description: 수정 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/GetOneUser"
  *       400:
  *         description: 잘못된 요청
  *       401:
@@ -48,9 +56,11 @@
  *     tags:
  *       - Users
  *     summary: 프로필 삭제 (Soft Delete)
+ *     security:
+ *       - bearerAuth: []
  *     description: 내 계정을 소프트 딜리트 처리한다.
  *     responses:
- *       200:
+ *       204:
  *         description: 삭제 성공
  *       401:
  *         description: 인증 필요
