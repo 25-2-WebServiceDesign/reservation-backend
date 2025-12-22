@@ -1,5 +1,5 @@
 const { sequelize } = require("../models");
-const {userRepo, userAuthRepo} = require("../repositories");
+const {userRepo, userAuthRepo, refreshTokenRepo} = require("../repositories");
 
 const AppError = require('../responses/AppError')
 
@@ -14,28 +14,64 @@ module.exports = {
                 providerUid: profile.id,
                 provider: "NAVER",
             }, {transaction})
+            
+            let userId = userAuth?.userId;
 
-            // 있으면
-            if (userAuth) {
-                const user = await userRepo.findById(userAuth.userId, {transaction});
-                
-                if (!user) {
-                    throw new AppError("NOT_FOUND", 404, "user is not founded");
+            // 없으면 유저 생성
+            if (!userId) {
+                const userData = {
+                    nickname: profile.name,
+                    email: profile.email,
+                    phone: profile.mobile_e164,
+                    profileImage: profile.profile_image,
                 }
-                // jwt 토큰 발급 및 반환
-                
+                const newUser = await userRepo.create(userData, {transaction});
 
-                return user;
+                // Auth 새로 생성
+                await userAuthRepo.create({
+                    userId: newUser.id,
+                    provider: "NAVER",
+                    providerUid: profile.id,
+                }, {transaction});
+
+                userId = newUser.id;
             }
 
+            // 유저 읽어오기
+            const user = await userRepo.findById(userId, {transaction});
+
+            if (!user) {
+                throw new AppError("NOT_FOUND", 404, "user is not founded");
+            }
+
+            const jwtUtil = require("../utils/jwt.util");
+
+            const accessToken = jwtUtil.generateAccessToken({id: user.id, role: user.role});
+            const refreshToken = jwtUtil.generateRefreshToken(user.id);
             
+            // refresh Token 재설정
+            const newRefreshToken = await refreshTokenRepo.create({
+                userId: user.id,
+                token: refreshToken,
+                expiresAt: new Date(jwtUtil.verifyRefreshToken(refreshToken).exp * 1000),
+            }, {transaction});
 
-            
+            const expiresIn = jwtUtil.accessTokenExpiresIn;
 
-
-
+            await transaction.commit();
+            return {
+                user,
+                accessToken,
+                refreshToken,
+                expiresIn
+            };
         } catch(err) {
-
+            await transaction.rollback()
+            throw err
         }
     },
+
+    async createUser(userData) {
+        
+    }
 }

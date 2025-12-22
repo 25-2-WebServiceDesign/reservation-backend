@@ -1,4 +1,5 @@
 const CustomError = require("../responses/customError")
+const ApiResponse = require("../responses/ApiResponse")
 
 const authNaverService = require("../services/authNaver.service");
 
@@ -8,10 +9,6 @@ const client_id = process.env.NAVER_CLIENT_ID;
 const client_secret = process.env.NAVER_CLIENT_SECRET;
 
 const redirectURI = encodeURI(process.env.NAVER_CALLBACK_URL);
-
-
-
-
 
 
 function getNaverLoginURL() {
@@ -64,16 +61,12 @@ module.exports = {
         const {code, state} = req.query;
 
         // state 검증
-
         try {
             const profile = await getProfile(code, state);
-            // console.log(profile.id)
-            // res.status(200).json(profile)
-
 
             // 로그인 혹은 유저 생성
-            const user = await authNaverService.login(profile);
-            
+            const loginData = await authNaverService.login(profile);
+            res.status(200).json(new ApiResponse(loginData));
         } catch(err) {
             next(err)
         }

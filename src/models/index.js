@@ -139,6 +139,8 @@ Reservation.belongsToMany(User, {
     otherKey: "userId",
 })
 
+// sequelize.sync({force: true});
+
 module.exports = {
     sequelize,
     User,
