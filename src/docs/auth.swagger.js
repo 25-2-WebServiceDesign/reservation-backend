@@ -59,6 +59,36 @@
 
 /**
  * @swagger
+ * /auth/firebase/google:
+ *  get:
+ *      tags:
+ *          - Auth
+ *      summary: firebase google 로그인을 위한 링크 (웹 브라우저에서 실행)
+ *      description: post /auth/firebase/login body 에 idToken 을 담아서 로그인 요청 결과를 브라우저에 출력
+ */
+
+/**
+ * @swagger
+ * /auth/firebase/login:
+ *  post:
+ *      tags: 
+ *          - Auth
+ *      summary: firebase 로그인 API
+ *      description: firebase 의 idToken 을 body 에서 받아서 로그인 처리
+ *      requestBody: 
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          idToken:
+ *                              type: string
+ *                          description: firebase idToken
+ */
+
+/**
+ * @swagger
  * /auth/logout:
  *  post:
  *      tags:

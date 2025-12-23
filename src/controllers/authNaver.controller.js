@@ -1,7 +1,7 @@
 const CustomError = require("../responses/customError")
 const ApiResponse = require("../responses/ApiResponse")
 
-const authNaverService = require("../services/authNaver.service");
+const authService = require("../services/auth.service");
 
 require('dotenv').config();
 
@@ -65,7 +65,7 @@ module.exports = {
             const profile = await getProfile(code, state);
 
             // 로그인 혹은 유저 생성
-            const loginData = await authNaverService.login(profile);
+            const loginData = await authService.naverLogin(profile);
             res.status(200).json(new ApiResponse(loginData));
         } catch(err) {
             next(err)
