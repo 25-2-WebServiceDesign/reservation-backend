@@ -11,7 +11,7 @@ const firebaseAuthRouter = require("./routes/authFirebse.router");
 const storesRouter = require("./routes/stores.router");
 const unitsRouter = require("./routes/units.router");
 // const storesRouter = require("./routes/stores.router");
-const unitRouter = require("./routes/units.router");
+// const unitRouter = require("./routes/units.router");
 const reviewRouter = require("./routes/reviews.router");
 
 app.use(express.json());
@@ -23,8 +23,8 @@ app.use("/stores", storesRouter);
 app.use("/units", unitsRouter);
 app.use("/api/stores", storesRouter);
 app.use("/api/units", unitsRouter);
-app.use("/reviews", reviewsRouter);
-app.use("/api/reviews", reviewsRouter);
+app.use("/reviews", reviewRouter);
+// app.use("/api/reviews", reviewsRouter);
 
 app.use('/api-docs', expressUi.serve, expressUi.setup(swaggerSpec));
 

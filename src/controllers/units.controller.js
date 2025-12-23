@@ -141,8 +141,7 @@ exports.getUnitAvailability = async (req, res, next) => {
     next(err);
   }
 };
-
-exports.getUnitReivews = async (req, res, next) => {
+exports.getUnitReviews = async (req, res, next) => {
   const unitId = Number(req.params.id);
 
   if (!Number.isInteger(unitId) || unitId <= 0) {
