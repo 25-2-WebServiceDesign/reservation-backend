@@ -1,4 +1,4 @@
-const requestForm = (data, meta = {}) => {
+const responseForm = (data, meta = {}) => {
     return {
         type: "object",
         properties: {
@@ -19,7 +19,10 @@ const requestForm = (data, meta = {}) => {
 };
 
 module.exports = {
-    GetAllReviews: requestForm(
+    StoreCreate: {
+        $ref: "#/components/schemas/Store"
+    },
+    GetAllReviews: responseForm(
         {
             type: "object",
             properties: {
@@ -30,7 +33,7 @@ module.exports = {
             }
         }
     ),
-    GetOneReview: requestForm(
+    GetOneReview: responseForm(
         {
             type: "object",
             properties: {
@@ -38,7 +41,7 @@ module.exports = {
             }
         }
     ),
-    GetOneUser: requestForm(
+    GetOneUser: responseForm(
         {
             type: "object",
             properties: {

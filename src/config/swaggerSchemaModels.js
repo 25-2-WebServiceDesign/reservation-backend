@@ -1,4 +1,33 @@
 module.exports = {
+    Store: {
+        type: "object",
+        properties: {
+            id: {
+                type: "integer"
+            },
+            name: {
+                type: "string",
+            },
+            address: {
+                type: 'string'
+            },
+            phone: {
+                type: "string"
+            },
+            ownerId: {
+                type: "integer",
+            },
+            category: {
+                type: "string"
+            },
+            homepageUrl: {
+                type: "string"
+            },
+            detail: {
+                type: 'string'
+            },
+        }
+    },
     User: {
         type: "object",
         properties: {
