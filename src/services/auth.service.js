@@ -27,6 +27,7 @@ async function getJWTTokens(user, transaction) {
     }
 }
 
+
 module.exports = {
     async googleLogin(idToken) {
         const transaction = await sequelize.transaction();
@@ -38,8 +39,7 @@ module.exports = {
                 providerUid: decoded.uid,
             }, {transaction});
 
-            let user = await userRepo.findById(userAuth?.id, {transaction});
-            console.log("user: ", user)
+            let user = await userRepo.findById(userAuth?.userId, {transaction});
 
             // 유저가 없으면 회원가입
             if (!user) {
@@ -49,7 +49,6 @@ module.exports = {
                     phone: decoded.phone_number || null,
                     profileImage: decoded.picture,
                 }
-                console.log(userData)
                 // User 새로 생성
                 user = await userRepo.create(userData, {transaction});
 
@@ -67,16 +66,14 @@ module.exports = {
                 revokedAt: null,
             }, {transaction});
 
-            if (refreshTokens) {
-                for (const index in refreshTokens) {
-                    const refreshToken = refreshTokens[index].dataValues
-                    await refreshTokenRepo.update(
-                        refreshToken.id, 
-                        {revokedAt: new Date()}, 
-                        {transaction}
-                    )
-                }
+            for (const token of refreshTokens) {
+                await refreshTokenRepo.update(
+                    token.id, 
+                    {revokedAt: new Date()}, 
+                    {transaction}
+                )
             }
+            
 
             const resData = await getJWTTokens(user, transaction);
 
@@ -126,15 +123,12 @@ module.exports = {
                 revokedAt: null,
             }, {transaction});
 
-            if (refreshTokens) {
-                for (const index in refreshTokens) {
-                    const refreshToken = refreshTokens[index].dataValues
-                    await refreshTokenRepo.update(
-                        refreshToken.id, 
-                        {revokedAt: new Date()}, 
-                        {transaction}
-                    )
-                }
+            for (const token of refreshTokens) {
+                await refreshTokenRepo.update(
+                    token.id, 
+                    {revokedAt: new Date()}, 
+                    {transaction}
+                )
             }
 
             const resData = await getJWTTokens(user, transaction);
@@ -145,5 +139,82 @@ module.exports = {
             await transaction.rollback()
             throw err
         }
-    }
+    },
+
+    async refresh(refreshToken) {
+        // refreshToken 검증
+        const jwtUtil = require("../utils/jwt.util");
+        const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+
+        if (!decoded) {
+            throw new CustomError("UNAUTHORIZED", "refreshToken is expired or invalid", 401)
+        }
+
+        const transaction = await sequelize.transaction()
+        try {
+            // refreshToken Table에서 찾기
+            const token = await refreshTokenRepo.findOne({
+                token: refreshToken,
+                userId: decoded.id,
+            }, {transaction});
+
+            if (!token || token.revokedAt) {
+                throw new CustomError("NOT_FOUND", "refreshToken is not founded in DB", 401);
+            }
+            // 비활성화
+            await refreshTokenRepo.update(token.id, {
+                revokedAt: new Date()
+            }, {transaction});
+
+            // 재발급
+            const user = await userRepo.findById(decoded.id, {transaction});
+
+            if (!user) {
+                throw new CustomError("UNAUTHORIZED", "user is not founded", 401);
+            }
+
+            const resData = await getJWTTokens(user, transaction);
+
+            await transaction.commit()
+            return resData;
+        } catch(err) {
+            await transaction.rollback()
+            throw err
+        }
+    },
+
+    async logout(refreshToken) {
+        const jwtUtil = require("../utils/jwt.util");
+        const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+
+        if (!decoded) {
+            throw new CustomError("UNAUTHORIZED", "refreshToken is expired or invalid", 401)
+        }
+
+        const transaction = await sequelize.transaction();
+        try {
+            // refreshToken 테이블에서 찾기
+            const token = await refreshTokenRepo.findOne({
+                token: refreshToken,
+                userId: decoded.id
+            }, {transaction});
+
+            if (!token || token.revokedAt) {
+                throw new CustomError("UNAUTHORIZED", "refreshToken is not founded in DB", 401);
+            }
+
+            // 비활성화
+            await refreshTokenRepo.update(token.id, {
+                revokedAt: new Date()
+            }, {transaction});
+
+            await transaction.commit();
+            return {message: "logout completed!"}
+
+        } catch(err) {
+            await transaction.rollback()
+            throw err;
+        }
+
+    },
 }
