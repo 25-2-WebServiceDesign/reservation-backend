@@ -14,6 +14,7 @@ const unitsRouter = require("./routes/units.router");
 // const storesRouter = require("./routes/stores.router");
 // const unitRouter = require("./routes/units.router");
 const reviewRouter = require("./routes/reviews.router");
+const usersRouter = require("./routes/users.router");
 
 const errorHandler = require('./middleware/errorHandler')
 
@@ -29,6 +30,8 @@ app.use("/api/stores", storesRouter);
 app.use("/api/units", unitsRouter);
 app.use("/reviews", reviewRouter);
 // app.use("/api/reviews", reviewsRouter);
+app.use("/users", usersRouter);
+// app.use("/api/users", usersRouter);
 
 app.use('/api-docs', expressUi.serve, expressUi.setup(swaggerSpec));
 
