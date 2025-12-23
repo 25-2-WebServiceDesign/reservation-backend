@@ -30,6 +30,14 @@ async function getJWTTokens(user, transaction) {
 
 module.exports = {
     async googleLogin(idToken) {
+        // firebase_config.json 없어서 추가
+        if(!firebaseAdmin) {
+            throw new CustomError(
+                "SERVICE_UNAVAILABLE",
+                "Firebase authentication is not configured",
+                503
+            );
+        }
         const transaction = await sequelize.transaction();
         const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
 
