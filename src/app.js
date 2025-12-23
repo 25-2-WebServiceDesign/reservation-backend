@@ -7,6 +7,7 @@ const expressUi = require("swagger-ui-express")
 // router 불러오기
 const naverAuthRouter = require("./routes/authNaver.router");
 const firebaseAuthRouter = require("./routes/authFirebse.router");
+const authRouter = require("./routes/auth.router");
 
 const storesRouter = require("./routes/stores.router");
 const unitsRouter = require("./routes/units.router");
@@ -17,6 +18,7 @@ const reviewRouter = require("./routes/reviews.router");
 app.use(express.json());
 
 // routers 연결
+app.use('/auth', authRouter)
 app.use("/auth/naver", naverAuthRouter)
 app.use("/auth/firebase", firebaseAuthRouter)
 app.use("/stores", storesRouter);
