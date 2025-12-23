@@ -2,7 +2,9 @@ const { sequelize } = require("../models");
 const unitsRepository = require("../repositories/reservationUnit.repository");
 const storesRepository = require("../repositories/store.repository");
 const AppError = require("../responses/AppError");
-
+const reservationRepository = require("../repositories/reservation.repository");
+const reviewRepository = require("../repositories/review.repository");
+const { Op } = require("sequelize");
 // Unit 생성 시 Store 존재 검증 필수
 
 exports.createUnit = async (unitData) => {
@@ -15,7 +17,7 @@ exports.createUnit = async (unitData) => {
       throw new AppError("NOT_FOUND", 404, "Store not found");
     }
 
-    const newUnit = unitsRepository.create(unitData, {transaction});
+    const newUnit = await unitsRepository.create(unitData, {transaction});
 
     await transaction.commit();
     return newUnit;
@@ -46,7 +48,7 @@ exports.updateUnit = async (unitId, newData) => {
     if (!unit) {
       throw new AppError("NOT_FOUND", 404, "Unit not found");
     }
-    const [affected] = unitsRepository.update(unitId, newData, {transaction});
+    const [affected] = await unitsRepository.update(unitId, newData, {transaction});
 
     if (!affected) {
       throw new AppError("NOT_FOUND", 404, "Unit not found"); 
@@ -210,4 +212,27 @@ exports.getUnitAvailability = async ({ unitId, date }) => {
     durationMin,
     slots,
   };
+};
+
+exports.getUnitReviews = async (unitId) => {
+  const unit = await unitsRepository.findById(unitId);
+  if (!unit) {
+    throw new AppError("NOT_FOUND", 404, "Unit not found");
+  }
+  const reservations = await reservationRepository.findAll(
+    { unitId },
+    { attributes: ["id"] }
+  );
+
+  if (!reservations || reservations.length === 0){
+    return [];
+  }
+
+  const reservationIds = reservations.map((r) => r.id);
+
+  const reviews = await reviewRepository.findAll({
+    reservationId: { [Op.in]: reservationIds },
+  });
+
+  return reviews;
 };

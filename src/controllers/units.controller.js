@@ -141,3 +141,18 @@ exports.getUnitAvailability = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getUnitReivews = async (req, res, next) => {
+  const unitId = Number(req.params.id);
+
+  if (!Number.isInteger(unitId) || unitId <= 0) {
+    return next(new AppError("BAD_REQUEST", 400, "unitId is required"));
+  }
+
+  try {
+    const reviews = await unitsService.getUnitReviews(unitId);
+    return res.status(200).json(ApiRsponse(reviews, { itemCount: reviews.length}));
+  } catch (err) {
+    return next(err);
+  }
+};

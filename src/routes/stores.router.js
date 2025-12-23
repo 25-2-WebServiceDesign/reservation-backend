@@ -9,4 +9,5 @@ router.get("/:storeId", storesController.getStoreById);
 router.put("/:storeId", storesController.updateStore);
 router.delete("/:storeId", storesController.deleteStore);
 
+router.get("/:id/reviews", storesController.getStoreReviews);
 module.exports = router;

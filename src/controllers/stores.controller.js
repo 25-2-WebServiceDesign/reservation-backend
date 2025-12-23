@@ -47,3 +47,17 @@ exports.deleteStore = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getStoreReviews = async (req, res, next) => {
+  const storeId = Number(req.params.id);
+    if (!Number.isInteger(storeId) || storeId <=0) {
+      return next(new AppError("BAD_REQUEST", 400, "stored is required"));
+    }
+
+    try {
+      const reviews = await storesService.getStoreReviews(storeId);
+      return res.status(200).json(reviews);
+    } catch(err) {
+      return next(err);
+    }
+};
