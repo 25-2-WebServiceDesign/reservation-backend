@@ -15,6 +15,8 @@ const unitsRouter = require("./routes/units.router");
 // const unitRouter = require("./routes/units.router");
 const reviewRouter = require("./routes/reviews.router");
 
+const errorHandler = require('./middleware/errorHandler')
+
 app.use(express.json());
 
 // routers 연결
@@ -34,5 +36,7 @@ app.use('/api-docs', expressUi.serve, expressUi.setup(swaggerSpec));
 app.use("/", (req, res) => {
     res.send("서버 정상 동작중")
 })
+
+app.use(errorHandler);
 
 module.exports = app;
