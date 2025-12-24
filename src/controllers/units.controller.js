@@ -257,3 +257,28 @@ exports.addBusinessHour = async (req, res, next) => {
     next(err)
   }
 }
+
+exports.putBusinessHour = async (req, res, next) => {
+  const unitId = Number(req.params.id);
+  const userId = Number(req.user?.id);
+  const payload = req.body
+
+  if (!userId) {
+    return next(new CustomError("UNAUTHORIZED", "user not found", 401));
+  }
+
+  if (!Number.isInteger(unitId) || unitId <= 0) {
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+  }
+
+  if (!Array.isArray(payload?.operatingHours) || payload.operatingHours.length === 0) {
+    return next(new CustomError("BAD_REQUEST", "businessHours must be a non-empty array", 400));
+  }
+
+  try {
+    const data = await unitsService.replaceBusinessHour(unitId, userId, payload);
+    res.status(200).json(new ApiResponse(data))
+  } catch(err) {
+    next(err)
+  }
+}

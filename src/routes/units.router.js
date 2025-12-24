@@ -13,7 +13,7 @@ router.get('/:id', unitsController.getDetail);
 
 router.post("/:id/business-hours", authenticate, unitsController.addBusinessHour)
 
-// router.put('/:id/business-hours', authenticate, unitsController.putBusinessHour);
+router.put('/:id/business-hours', authenticate, unitsController.putBusinessHour);
 
 // router.get('/:id/availability', unitsController.getAvailability);
 

@@ -60,7 +60,7 @@ exports.delete = async (unitId, userId) => {
     const affected = await reservationUnitRepo.remove(unitId, {transaction});
     
     if (affected === 0) {
-      throw new CustomError("NOT_FOUND", "store not found", 404);
+      throw new CustomError("NOT_FOUND", "reservationUnit not found", 404);
     }
 
     await transaction.commit();
@@ -76,6 +76,12 @@ exports.addBusinessHour = async (unitId, userId, payload) => {
 
   try {
     await verifyUnitOwner(unitId, userId, transaction);
+
+    const reservationPolicy = await reservationPolicyRepo.findOne({unitId}, {transaction});
+
+    if (reservationPolicy) {
+      throw new CustomError("CONFLICT", "reservationPolicy is already exist", 409)
+    }
 
     // business Policy 생성
     const policyData = {
@@ -100,15 +106,69 @@ exports.addBusinessHour = async (unitId, userId, payload) => {
       )
     );
 
-    hours = await operatingHourRepo.findAll({policyId: policy.id}, {transaction})
+    const hours = await operatingHourRepo.findAll({policyId: policy.id}, {transaction})
 
     await transaction.commit()
     return {
-      ...policy.dataValues,
+      ...policy.get({plain: true}),
       operatingHours: hours
     }
   } catch(err) {
     await transaction.rollback()
+    throw err;
+  }
+}
+
+exports.replaceBusinessHour = async (unitId, userId, payload) => {
+  const transaction = await sequelize.transaction()
+
+  try {
+    await verifyUnitOwner(unitId, userId, transaction);
+
+    // 존재 확인
+    const reservationPolicy = await reservationPolicyRepo.findOne({unitId}, {transaction});
+
+    if (!reservationPolicy) {
+      throw new CustomError("NOT_FOUND", "reservationPolicy is not founded", 404)
+    }
+    const affected = await reservationPolicyRepo.remove(reservationPolicy.id, {transaction});
+
+    if (affected === 0) {
+      throw new CustomError("NOT_FOUND", "reservationPolicy is not founded", 404)
+    }
+
+    // business Policy 생성
+    const policyData = {
+      unitId,
+      slotDuration: payload.slotDuration,
+      maximumHeadcount: payload.maximumHeadcount,
+    }
+    const policy = await reservationPolicyRepo.create(policyData, {transaction});
+
+    // operating Hour 생성
+    const operatingHours = payload.operatingHours;
+
+    await Promise.all(
+      operatingHours.map(hour =>
+        operatingHourRepo.create(
+          {
+            ...hour,
+            policyId: policy.id,
+          },
+          { transaction }
+        )
+      )
+    );
+
+    const hours = await operatingHourRepo.findAll({policyId: policy.id}, {transaction})
+
+    await transaction.commit()
+    return {
+      ...policy.get({plain: true}),
+      operatingHours: hours
+    }
+  } catch(err) {
+    await transaction.rollback();
     throw err;
   }
 }

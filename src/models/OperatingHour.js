@@ -24,7 +24,7 @@ const OperatingHour = sequelize.define("OperatingHour", {
         allowNull: false,
     },
 }, {
-    timestamps: true,
+    timestamps: false,
     paranoid: false,
 })
 
