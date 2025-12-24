@@ -24,6 +24,113 @@ async function verifyUnitOwner(unitId, userId, transaction = null) {
   }
 }
 
+function toMinutes(timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function toTimeString(minutes) {
+  const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const m = String(minutes % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+async function assertReservable({
+  unitId,
+  startTime,
+  headcount = 1,
+  transaction = null,
+}) {
+  // 1. unit
+  const unit = await reservationUnitRepo.findById(unitId, { transaction });
+  if (!unit) {
+    throw new CustomError("NOT_FOUND", "unit not found", 404);
+  }
+
+  // 2. policy
+  const policy = await reservationPolicyRepo.findOne(
+    { unitId },
+    { transaction }
+  );
+  if (!policy) {
+    throw new CustomError("FORBIDDEN", "reservation policy not found", 403);
+  }
+
+  const slotDuration = policy.slotDuration;
+  const maximumHeadcount = policy.maximumHeadcount;
+
+  if (headcount > maximumHeadcount) {
+    throw new CustomError(
+      "BAD_REQUEST",
+      "headcount exceeds maximumHeadcount",
+      400
+    );
+  }
+
+  // 3. 요일
+  const dayOfWeekMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const dayOfWeek = dayOfWeekMap[startTime.getDay()];
+
+  // 4. 운영시간
+  const operatingHour = await operatingHourRepo.findOne(
+    {
+      policyId: policy.id,
+      dayOfWeek,
+    },
+    { transaction }
+  );
+
+  if (!operatingHour) {
+    throw new CustomError("FORBIDDEN", "unit is not operating", 403);
+  }
+
+  // 5. 시간 범위 계산
+  const startMinutes =
+    startTime.getHours() * 60 + startTime.getMinutes();
+  const endMinutes = startMinutes + slotDuration;
+
+  const openMinutes = toMinutes(operatingHour.openTime);
+  const closeMinutes = toMinutes(operatingHour.closeTime);
+
+  if (startMinutes < openMinutes || endMinutes > closeMinutes) {
+    throw new CustomError(
+      "BAD_REQUEST",
+      "reservation time is out of operating hours",
+      400
+    );
+  }
+
+  // 6. 같은 시간대 예약 충돌 확인
+  const endTime = new Date(startTime);
+  endTime.setMinutes(endTime.getMinutes() + slotDuration);
+
+  const overlapped = await reservationRepo.findOne(
+    {
+      unitId,
+      status: { [Op.in]: ["PENDING", "CONFIRMED"] },
+      startTime: { [Op.lt]: endTime },
+      endTime: { [Op.gt]: startTime },
+    },
+    { transaction }
+  );
+
+  if (overlapped) {
+    throw new CustomError(
+      "CONFLICT",
+      "reservation time already occupied",
+      409
+    );
+  }
+
+  return {
+    unit,
+    policy,
+    startTime,
+    endTime,
+  };
+}
+
+
 // 사용중
 exports.getUnitById = async (unitId) => {
   const unit = await reservationUnitRepo.findById(unitId);
@@ -173,63 +280,47 @@ exports.replaceBusinessHour = async (unitId, userId, payload) => {
   }
 }
 
-function toMinutes(timeStr) {
-  const [h, m] = timeStr.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function toTimeString(minutes) {
-  const h = String(Math.floor(minutes / 60)).padStart(2, "0");
-  const m = String(minutes % 60).padStart(2, "0");
-  return `${h}:${m}`;
-}
 
 exports.getUnitAvailability = async ({ unitId, date }) => {
-  // unit 확인
   const unit = await reservationUnitRepo.findById(unitId);
   if (!unit) {
     throw new CustomError("NOT_FOUND", "unit not found", 404);
   }
 
-  // policy 확인
   const policy = await reservationPolicyRepo.findOne({ unitId });
   if (!policy) return [];
 
   const slotDuration = policy.slotDuration;
 
-  // 요일 계산
   const targetDate = new Date(`${date}T00:00:00+09:00`);
   const dayOfWeekMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const dayOfWeek = dayOfWeekMap[targetDate.getDay()];
 
-  // 운영시간
   const operatingHour = await operatingHourRepo.findOne({
     policyId: policy.id,
     dayOfWeek,
   });
   if (!operatingHour) return [];
 
-  // 날짜 범위 계산 (KST)
   const startOfDay = new Date(`${date}T00:00:00+09:00`);
   const endOfDay = new Date(`${date}T23:59:59+09:00`);
 
-  // 예약 조회
+  // 🔥 핵심 수정
   const reservations = await reservationRepo.findAll({
     unitId,
     status: { [Op.in]: ["PENDING", "CONFIRMED"] },
-    startTime: { [Op.between]: [startOfDay, endOfDay] },
+    startTime: { [Op.lt]: endOfDay },
+    endTime: { [Op.gt]: startOfDay },
   });
 
-  // 분 단위 변환
+  const reservedRanges = reservations.map(r => ({
+    start: r.startTime.getHours() * 60 + r.startTime.getMinutes(),
+    end: r.endTime.getHours() * 60 + r.endTime.getMinutes(),
+  }));
+
   const openMinutes = toMinutes(operatingHour.openTime);
   const closeMinutes = toMinutes(operatingHour.closeTime);
 
-  const reservedRanges = reservations.map(r => ({
-    start: toMinutes(r.startTime.toISOString().slice(11, 16)),
-    end: toMinutes(r.endTime.toISOString().slice(11, 16)),
-  }));
-
-  // 슬롯 생성
   const availableSlots = [];
 
   for (
@@ -246,7 +337,7 @@ exports.getUnitAvailability = async ({ unitId, date }) => {
     }
   }
 
-  // 오늘이면 과거 시간 제거
+  // 오늘이면 과거 제거
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
 
@@ -257,3 +348,37 @@ exports.getUnitAvailability = async ({ unitId, date }) => {
 
   return availableSlots;
 };
+
+exports.createReservation = async ({userId, unitId, startTime, memo, headcount}) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const start = new Date(startTime);
+
+    const { endTime } = await assertReservable({
+      unitId,
+      startTime: start,
+      headcount,
+      transaction,
+    });
+
+    const reservation = await reservationRepo.create(
+      {
+        userId,
+        unitId,
+        startTime: start,
+        endTime,
+        memo,
+        headcount,
+        status: "PENDING",
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+    return reservation;
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
+}

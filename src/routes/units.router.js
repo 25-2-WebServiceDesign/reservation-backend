@@ -17,7 +17,7 @@ router.put('/:id/business-hours', authenticate, unitsController.putBusinessHour)
 
 router.get('/:id/availability', unitsController.getAvailability);
 
-// router.post("/:id/reservations", authenticate, authenticateRole(["CUSTOMER"]), unitsController.createReservation);
+router.post("/:id/reservations", authenticate, authenticateRole(["CUSTOMER"]), unitsController.createReservation);
 
 // router.get("/:id/reviews", unitsController.getReviews)
 
