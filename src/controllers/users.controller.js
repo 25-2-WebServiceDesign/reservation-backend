@@ -3,7 +3,7 @@ const usersService = require("../services/users.service");
 
 exports.getMe = async (req, res, next) => {
     if (!req.user || !req.user.id) {
-        return next(new CustomError("UNAUTHORIZED", "No authroization information", 401));
+        return next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
     }
 
     try {
@@ -22,7 +22,7 @@ exports.getUserById = async (req, res, next) => {
     const userId = req.params.id;
 
     if (!userId || userId === 0) {
-        next(new CustomError("BAD_REQUEST", "path parameter 'id' is required", 400));
+        return next(new CustomError("BAD_REQUEST", "path parameter 'id' is required", 400));
     }
 
     try {
@@ -32,3 +32,27 @@ exports.getUserById = async (req, res, next) => {
         return next(err);
     }
 }
+exports.updateMe = async (req, res, next) => {
+  if (!req.user || !req.user.id) {
+    return next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+  }
+
+  const { nickname, phone, profileImage } = req.body || {};
+  const hasAny =
+    nickname !== undefined || phone !== undefined || profileImage !== undefined;
+
+  if (!hasAny) {
+    return next(new CustomError("BAD_REQUEST", "nothing to update", 400));
+  }
+
+  try {
+    const updated = await usersService.updateMe(req.user.id, {
+      nickname,
+      phone,
+      profileImage,
+    });
+    return res.status(200).json(updated);
+  } catch (err) {
+    return next(err);
+  }
+};

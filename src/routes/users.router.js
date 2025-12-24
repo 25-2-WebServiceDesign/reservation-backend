@@ -5,6 +5,7 @@ const usersController = require("../controllers/users.controller");
 const { authenticate, authenticateRole } = require("../middleware/auth.middleware");
 
 router.get("/me", authenticate, usersController.getMe);
+router.patch("/me", authenticate, usersController.updateMe);
 
 router.get("/:id", authenticate, authenticateRole(["ADMIN"]), usersController.getUserById);
 

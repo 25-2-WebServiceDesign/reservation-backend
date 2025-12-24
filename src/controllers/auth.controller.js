@@ -9,7 +9,7 @@ module.exports = {
         const { refreshToken } = req.body;
 
         if (!refreshToken) {
-            next(new CustomError("BAD_REQUEST", "refreshToken is required", 400));
+            return next(new CustomError("BAD_REQUEST", "refreshToken is required", 400));
         }
 
         // process
@@ -26,7 +26,7 @@ module.exports = {
         const { refreshToken } = req.body;
 
         if (!refreshToken) {
-            next(new CustomError("BAD_REQUEST", "refreshToken is required", 400));
+            return next(new CustomError("BAD_REQUEST", "refreshToken is required", 400));
         }
 
         // process

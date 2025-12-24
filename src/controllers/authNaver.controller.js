@@ -47,9 +47,9 @@ async function getProfile(code, state) {
 
         return profile.data.response;
     } catch(err) {
-        throw new CustomError("Internal Error", "axios getNaverUserAccess Error", 500);
+          console.log("[NAVER TOKEN ERROR]", err.response?.status, err.response?.data);
+          throw new CustomError("INTERNAL_ERROR", "axios getNaverUserAccess Error", 500);    }
     }
-}
 
 module.exports = {
     async naverLogin(req, res) {
