@@ -2,7 +2,8 @@ const storesService = require("../services/stores.service");
 
 exports.createStore = async (req, res, next) => {
   try {
-    const store = await storesService.createStore(req.body);
+    const payload = { ...req.body, ownerId: req.user.id };
+    const store = await storesService.createStore(payload);
     res.status(201).json(store);
   } catch (err) {
     next(err);
@@ -50,14 +51,14 @@ exports.deleteStore = async (req, res, next) => {
 
 exports.getStoreReviews = async (req, res, next) => {
   const storeId = Number(req.params.id);
-    if (!Number.isInteger(storeId) || storeId <=0) {
-      return next(new AppError("BAD_REQUEST", 400, "stored is required"));
-    }
+  if (!Number.isInteger(storeId) || storeId <= 0) {
+    return next(new AppError("BAD_REQUEST", 400, "storeId is required"));
+  }
 
-    try {
-      const reviews = await storesService.getStoreReviews(storeId);
-      return res.status(200).json(reviews);
-    } catch(err) {
-      return next(err);
-    }
+  try {
+    const reviews = await storesService.getStoreReviews(storeId);
+    return res.status(200).json(reviews);
+  } catch (err) {
+    return next(err);
+  }
 };
