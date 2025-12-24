@@ -124,7 +124,7 @@ exports.getMyReviews = async (req, res, next) => {
   // processing
   try {
     const {data, totalCount, totalPage} = await usersService.getReviews(req.user.id, page, limit);
-    res.status(200).json(new ApiResponse(data, {
+    res.status(200).json(new ApiResponse({reviews: data}, {
       page,
       limit,
       totalCount,

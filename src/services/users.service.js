@@ -113,7 +113,7 @@ exports.getReviews = async (userId, page, limit) => {
   const offset = limit * (page - 1)
   const {rows, count} = await reviewRepo.findAndCountAll({
     where: {userId},
-    limit,
+    page,
     offset,
     order: [["createdAt", "DESC"]]
   })
