@@ -207,7 +207,7 @@ exports.update = async (req, res, next) => {
       profileImage,
       detailUrl
     });
-    res.statis(200).json(new ApiResponse({unit: updatedUnit}));
+    res.status(200).json(new ApiResponse({unit: updatedUnit}));
   } catch(err) {
     next(err)
   }

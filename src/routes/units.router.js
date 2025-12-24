@@ -7,7 +7,7 @@ const {authenticate, authenticateRole} = require("../middleware/auth.middleware"
 
 router.patch('/:id', authenticate, unitsController.update);
 
-router.delete(":id", authenticate, unitsController.delete);
+router.delete("/:id", authenticate, unitsController.delete);
 
 router.get('/:id', unitsController.getDetail);
 

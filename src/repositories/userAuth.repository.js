@@ -18,7 +18,7 @@ async function findAll(where = {}, options = {}) {
 
 async function update(id, data, options = {}) {
   await UserAuth.update(data, { where: { id }, ...options });
-  return findById(id);
+  return findById(id, options);
 }
 
 async function remove(id, options = {}) {
