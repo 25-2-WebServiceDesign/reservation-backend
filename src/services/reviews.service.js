@@ -1,5 +1,6 @@
 const CustomError = require("../responses/customError");
 const { reviewRepo, reservationRepo } = require("../repositories");
+const { Reservation, Review } = require("../models");
 
 const {sequelize} = require("../models")
 
@@ -16,14 +17,16 @@ function conflict(msg) {
   return new CustomError("CONFLICT", msg, 409);
 }
 
-function reviewSaftyWrapper(review) {
+function reviewSafetyWrapper(r) {
   return {
-    id: review.id,
-    userId: review.userId,
-    reservationId: review.reservationId,
-    rating: review.rating,
-    content: review.content
-  }
+    id: r.id,
+    reservationId: r.reservationId,
+    userId: r.userId,
+    content: r.content,
+    rating: r.rating,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  };
 }
 
 exports.getReviewById = async (id) => {
@@ -66,4 +69,25 @@ exports.deleteMyReview = async (userId, reviewId) => {
 
   await reviewRepo.remove(reviewId);
   return { message: "리뷰가 삭제되었습니다." };
+};
+
+
+exports.createReviewForReservation = async (userId, reservationId, { rating, content = null }) => {
+  if (!Number.isInteger(reservationId) || reservationId <= 0) {
+    throw badRequest("reservationId is invalid");
+  }
+  if (!Number.isInteger(rating)) throw badRequest("rating is required");
+  if (rating < 0 || rating > 10) throw badRequest("rating must be 0~10");
+
+  const reservation = await reservationRepo.findOne({ id: reservationId, userId });
+  if (!reservation) throw notFound("Reservation not found");
+
+  if (String(reservation.status).toUpperCase() === "CANCELED") {
+    throw badRequest("Canceled reservation cannot be reviewed");
+  }
+
+  const exists = await reviewRepo.findOne({ reservationId });
+  if (exists) throw conflict("Review already exists for this reservation");
+
+  return reviewRepo.create({ userId, reservationId, rating, content });
 };

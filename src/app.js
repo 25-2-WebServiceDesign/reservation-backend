@@ -34,6 +34,8 @@ app.use("/users", usersRouter);
 // app.use("/api/users", usersRouter);
 app.use("/reservations", reservationsRouter);
 //app.use("/api/reservations", reservationsRouter);
+app.use("/reviews", reviewsRouter);
+//app.use("/api/reviews", reviewsRouter);
 
 app.use('/api-docs', expressUi.serve, expressUi.setup(swaggerSpec));
 
