@@ -39,16 +39,23 @@ exports.updateStore = async (storeId, data) => {
 };
 */
 
-exports.deleteStore = async (storeId) => {
-  // const store = await storeRepo.findById(storeId);
-  // if (!store) {
-  //   throw new AppError("NOT_FOUND", 404, "Store not found");
-  // }
-  const affected = await storeRepo.remove(storeId);
-  
-  if (affected === 0) {
+exports.deleteStore = async (storeId, user) => {
+  const id = Number(storeId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "storeId is invalid");
+  }
+
+  const store = await storeRepo.findById(id);
+  if (!store) {
     throw new AppError("NOT_FOUND", 404, "Store not found");
   }
+
+  // OWNER는 본인 가게만 / ADMIN은 예외
+  if (user?.role !== "ADMIN" && store.ownerId !== user?.id) {
+    throw new AppError("FORBIDDEN", 403, "No permission to delete this store");
+  }
+
+  await storeRepo.remove(id);
 };
 
 exports.getStoreReviews = async (storeId) => {

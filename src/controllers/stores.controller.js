@@ -44,8 +44,8 @@ exports.updateStore = async (req, res, next) => {
 
 exports.deleteStore = async (req, res, next) => {
   try {
-    await storesService.deleteStore(req.params.storeId);
-    res.status(204).send();
+    await storesService.deleteStore(req.params.storeId, req.user);
+    return res.status(204).send();
   } catch (err) {
     next(err);
   }

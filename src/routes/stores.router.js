@@ -9,7 +9,7 @@ router.post("/", authenticate, authenticateRole(["OWNER", "ADMIN"]), storesContr
 router.get("/", storesController.getStores);
 router.get("/:storeId", storesController.getStoreById);
 //router.put("/:storeId", storesController.updateStore);
-router.delete("/:storeId", storesController.deleteStore);
+router.delete("/:storeId", authenticate, authenticateRole(["OWNER", "ADMIN"]),storesController.deleteStore);
 router.patch("/:storeId", authenticate, authenticateRole(["OWNER", "ADMIN"]), storesController.patchStore);
 
 router.get("/:id/reviews", storesController.getStoreReviews);
