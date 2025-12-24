@@ -2,7 +2,7 @@ const { sequelize } = require("../models");
 
 const CustomError = require("../responses/customError")
 
-const {reservationUnitRepo, storeRepo} = require("../repositories")
+const {reservationUnitRepo, storeRepo, reservationPolicyRepo, operatingHourRepo} = require("../repositories")
 
 // const { Op } = require("sequelize");
 // 소유 확인하는 메서드
@@ -65,6 +65,48 @@ exports.delete = async (unitId, userId) => {
 
     await transaction.commit();
     return {message: "reservationUnit delete succeed"};
+  } catch(err) {
+    await transaction.rollback()
+    throw err;
+  }
+}
+
+exports.addBusinessHour = async (unitId, userId, payload) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    await verifyUnitOwner(unitId, userId, transaction);
+
+    // business Policy 생성
+    const policyData = {
+      unitId,
+      slotDuration: payload.slotDuration,
+      maximumHeadcount: payload.maximumHeadcount,
+    }
+    const policy = await reservationPolicyRepo.create(policyData, {transaction});
+
+    // operating Hour 생성
+    const operatingHours = payload.operatingHours;
+
+    await Promise.all(
+      operatingHours.map(hour =>
+        operatingHourRepo.create(
+          {
+            ...hour,
+            policyId: policy.id,
+          },
+          { transaction }
+        )
+      )
+    );
+
+    hours = await operatingHourRepo.findAll({policyId: policy.id}, {transaction})
+
+    await transaction.commit()
+    return {
+      ...policy.dataValues,
+      operatingHours: hours
+    }
   } catch(err) {
     await transaction.rollback()
     throw err;

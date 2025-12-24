@@ -11,7 +11,7 @@ router.delete("/:id", authenticate, unitsController.delete);
 
 router.get('/:id', unitsController.getDetail);
 
-// router.post("/:id/business-hours", authenticate, unitsController.addBusinessHour)
+router.post("/:id/business-hours", authenticate, unitsController.addBusinessHour)
 
 // router.put('/:id/business-hours', authenticate, unitsController.putBusinessHour);
 

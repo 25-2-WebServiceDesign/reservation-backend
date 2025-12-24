@@ -1,5 +1,6 @@
-const a = undefined;
+const a = [1, 2];
 const b = Number("dd");
 
-console.log(b)
-console.log(Number.isInteger(b))
+for (const i of a) {
+    console.log(i)
+}

@@ -164,7 +164,7 @@ exports.getDetail = async (req, res, next) => {
   const unitId = Number(req.params?.id);
 
   if (!Number.isInteger(unitId) || unitId <= 0) {
-    next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
   }
 
   // process
@@ -188,15 +188,15 @@ exports.update = async (req, res, next) => {
   const userId = req.user?.id;
 
   if (!Number.isInteger(unitId) || unitId <= 0) {
-    next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
   }
 
   if (name === undefined && description === undefined && profileImage === undefined && detailUrl === undefined) {
-    next(new CustomError("BAD_REQUEST", "nothing to udpate", 400));
+    return next(new CustomError("BAD_REQUEST", "nothing to udpate", 400));
   }
 
   if (!userId) {
-    next(new CustomError("UNAUTHORIZED", "user not found", 401));
+    return next(new CustomError("UNAUTHORIZED", "user not found", 401));
   }
 
   // processing
@@ -218,11 +218,11 @@ exports.delete = async (req, res, next) => {
   const unitId = Number(req.params.id);
 
   if (!userId) {
-    next(new CustomError("UNAUTHORIZED", "user not found", 401));
+    return next(new CustomError("UNAUTHORIZED", "user not found", 401));
   }
 
   if (!Number.isInteger(unitId) || unitId <= 0) {
-    next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
   }
 
   try {
@@ -231,6 +231,29 @@ exports.delete = async (req, res, next) => {
   } catch(err) {
     next(err);
   }
+}
 
+exports.addBusinessHour = async (req, res, next) => {
+  const userId = req.user?.id;
+  const unitId = Number(req.params.id);
+  const payload = req.body;
 
+  if (!userId) {
+    return next(new CustomError("UNAUTHORIZED", "user not found", 401));
+  }
+
+  if (!Number.isInteger(unitId) || unitId <= 0) {
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+  }
+
+  if (!Array.isArray(payload?.operatingHours) || payload.operatingHours.length === 0) {
+    return next(new CustomError("BAD_REQUEST", "businessHours must be a non-empty array", 400));
+  }
+
+  try {
+    const data = await unitsService.addBusinessHour(unitId, userId, payload)
+    res.status(201).json(new ApiResponse(data))
+  } catch(err) {
+    next(err)
+  }
 }
