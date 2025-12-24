@@ -218,3 +218,31 @@ exports.createReservation = async (req, res, next) => {
     return next(err)
   }
 }
+
+exports.getReviews = async (req, res, next) => {
+  // unitId, page, limit
+  const unitId = Number(req.params.id);
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 5;
+
+  if (!Number.isInteger(unitId) || unitId <= 0) {
+    return next(new CustomError("BAD_REQUEST", "unitId is invalid", 400));
+  }
+
+  try {
+    const {
+      data,
+      totalCount,
+      totalPage
+    } = await unitsService.getReviews(unitId, page, limit);
+    return res.status(200).json(new ApiResponse(data, {
+      page,
+      limit,
+      totalCount,
+      totalPage
+    }))
+
+  } catch(err) {
+    return next(err)
+  }
+}

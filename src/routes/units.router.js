@@ -19,7 +19,7 @@ router.get('/:id/availability', unitsController.getAvailability);
 
 router.post("/:id/reservations", authenticate, authenticateRole(["CUSTOMER"]), unitsController.createReservation);
 
-// router.get("/:id/reviews", unitsController.getReviews)
+router.get("/:id/reviews", unitsController.getReviews)
 
 
 

@@ -1,8 +1,8 @@
-const { sequelize, Sequelize } = require("../models");
+const { sequelize, Sequelize, Reservation } = require("../models");
 
 const CustomError = require("../responses/customError")
 
-const {reservationUnitRepo, storeRepo, reservationPolicyRepo, operatingHourRepo, reservationRepo} = require("../repositories")
+const {reservationUnitRepo, storeRepo, reservationPolicyRepo, operatingHourRepo, reservationRepo, reviewRepo} = require("../repositories")
 
 const { Op } = require("sequelize");
 // 소유 확인하는 메서드
@@ -382,3 +382,42 @@ exports.createReservation = async ({userId, unitId, startTime, memo, headcount})
     throw err;
   }
 }
+
+exports.getReviews = async (unitId, page = 1, limit = 5) => {
+  // 1. unit 존재 확인
+  const unit = await reservationUnitRepo.findById(unitId);
+  if (!unit) {
+    throw new CustomError("NOT_FOUND", "unit not found", 404);
+  }
+
+  // 2. pagination 계산
+  const offset = (page - 1) * limit;
+
+  // 3. 리뷰 조회 (Reservation JOIN)
+  const { rows, count } = await reviewRepo.findAndCountAll({
+    where: {
+      deletedAt: null,
+    },
+    include: [
+      {
+        model: Reservation,
+        attributes: [], // reservation 데이터는 응답에 포함 안 함
+        where: {
+          unitId,
+        },
+        required: true, // INNER JOIN
+      },
+    ],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+  });
+
+  const totalPage = Math.ceil(count / limit);
+
+  return {
+    data: rows,
+    totalCount: count,
+    totalPage,
+  };
+};

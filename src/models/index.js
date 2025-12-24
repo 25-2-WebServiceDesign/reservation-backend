@@ -128,17 +128,24 @@ Store.belongsToMany(User, {
     otherKey: "userId",
 })
 
-// User - Review - Reservation
-User.belongsToMany(Reservation, {
-    through: Review,
-    foreignKey: "userId",
-    otherKey: "reservationId",
-})
-Reservation.belongsToMany(User, {
-    through: Review,
+// Reservation - Review
+Reservation.hasOne(Review, {
     foreignKey: "reservationId",
-    otherKey: "userId",
-})
+    onDelete: "CASCADE",
+});
+Review.belongsTo(Reservation, {
+    foreignKey: "reservationId",
+});
+
+// User - Review
+User.hasMany(Review, {
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+});
+Review.belongsTo(User, {
+    foreignKey: "userId",
+});
+
 
 // sequelize.sync({force: true});
 

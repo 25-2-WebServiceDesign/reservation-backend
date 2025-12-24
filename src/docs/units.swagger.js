@@ -238,9 +238,21 @@
  *            name: id
  *            required: true
  *            schema:
- *                type: integer
+ *              type: integer
  *            description: 유닛 ID
  *            default: 1
+ *          - in: query
+ *            name: page
+ *            required: false
+ *            schema:
+ *              type: integer
+ *            default: 1
+ *          - in: query
+ *            name: limit
+ *            required: false
+ *            schema:
+ *              type: integer
+ *            default: 5
  *      responses:
  *          200:
  *              description: ok 유닛 리뷰들 조회 성공
