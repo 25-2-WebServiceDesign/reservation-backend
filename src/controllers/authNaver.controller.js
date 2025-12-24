@@ -38,7 +38,6 @@ async function getProfile(code, state) {
 
     try {
         const data = await axios.get(apiUrl, options);
-        console.log(data.data.access_token)
         const profile = await axios.get(
             "https://openapi.naver.com/v1/nid/me", {
             headers: {
@@ -64,7 +63,8 @@ module.exports = {
         // state 검증
         try {
             const profile = await getProfile(code, state);
-            console.log(profile)
+            // console.log(profile)
+
             // 로그인 혹은 유저 생성
             const loginData = await authService.naverLogin(profile);
             res.status(200).json(new ApiResponse(loginData));
