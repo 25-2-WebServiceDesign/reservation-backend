@@ -126,7 +126,7 @@
  *            required: true
  *            schema:
  *                type: integer
- *            description: 유닛 ID
+ *            description: user ID
  *            default: 1
  *      requestBody:
  *          required: true
@@ -146,6 +146,34 @@
  *              description: 인증 오류
  *          403:
  *              description: 권한 없음
+ *          404:
+ *              description: 유저를 찾을 수 없음
+ */
+
+/**
+ * @swagger
+ * /users/{id}:
+ *  get:
+ *      tags:
+ *          - Users
+ *      summary: (관리자) 유저 id 로 검색
+ *      security:
+ *          - bearerAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *                type: integer
+ *            description: user ID
+ *            default: 1
+ *      responses:
+ *          200:
+ *              description: 유저 상세 불러오기 성공
+ *          401:
+ *              description: 인증 오류
+ *          403:
+ *              description: 권한 오류
  *          404:
  *              description: 유저를 찾을 수 없음
  */
