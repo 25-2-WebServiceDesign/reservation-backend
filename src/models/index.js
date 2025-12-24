@@ -62,22 +62,23 @@ Store.belongsToMany(User, {
     otherKey: "userId",
 })
 
-// // Favorite - User
-// User.hasMany(Favorite, {
-//     foreignKey: "userId",
-//     onDelete: "CASCADE",
-// })
-// Favorite.belongsTo(User, {
-//     foreignKey: "userId",
-// })
-// // Favorite - Store
-// Store.hasMany(Favorite, {
-//     foreignKey: "storeId",
-//     onDelete: "CASCADE",
-// })
-// Favorite.belongsTo(Store, {
-//     foreignKey: "storeId",
-// })
+// Favorite - User
+User.hasMany(Favorite, {
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+})
+Favorite.belongsTo(User, {
+    foreignKey: "userId",
+})
+
+// Favorite - Store
+Store.hasMany(Favorite, {
+    foreignKey: "storeId",
+    onDelete: "CASCADE",
+})
+Favorite.belongsTo(Store, {
+    foreignKey: "storeId",
+})
 
 // ReservationPolicy - ReservationUnit
 ReservationUnit.hasOne(ReservationPolicy, {

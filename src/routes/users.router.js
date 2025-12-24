@@ -19,7 +19,7 @@ router.delete("/me", authenticate, usersController.deleteMe);
 router.patch("/:id/role", authenticate, authenticateRole(["ADMIN"]), usersController.changeRole)
 
 router.get('/me/reviews', authenticate, usersController.getMyReviews);
-
+router.get("/me/favorites", authenticate, usersController.getMyFavorites);
 // router.get("/me/favorites", (req, res) => {});
 
 module.exports = router;

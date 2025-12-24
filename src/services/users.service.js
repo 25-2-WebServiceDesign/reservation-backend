@@ -1,8 +1,8 @@
 const sequelize = require("../config/sequelize");
 
 const CustomError = require("../responses/customError");
-const { userRepo } = require("../repositories");
-const { reviewRepo, reservationRepo } = require("../repositories");
+const { Store, Favorite } = require("../models");
+const { userRepo, reviewRepo, reservationRepo } = require("../repositories");
 
 function userSaftyRapper(user) {
     const safeUser = {
@@ -25,6 +25,20 @@ function reviewSaftyWrapper(review) {
     content: review.content,
   }
   return safeReview;
+}
+
+function storeSafetyWrapper(store) {
+  return {
+    id: store.id,
+    ownerId: store.ownerId,
+    name: store.name,
+    category: store.category,
+    address: store.address,
+    phone: store.phone,
+    homepageUrl: store.homepageUrl,
+    detail: store.detail,
+    createdAt: store.createdAt,
+  };
 }
 
 exports.getById = async (userId) => {
@@ -110,3 +124,48 @@ exports.getReviews = async (userId, page, limit) => {
     totalPage: Math.ceil(count / limit),
   }
 }
+
+exports.getFavorites = async (userId, { page = 1, limit = 10, order = "desc" } = {}) => {
+  const p = Number(page);
+  const l = Number(limit);
+  const ord = order === "asc" ? "ASC" : "DESC";
+
+  if (!Number.isInteger(p) || p <= 0) {
+    throw new CustomError("BAD_REQUEST", "page must be a positive integer", 400);
+  }
+  if (!Number.isInteger(l) || l <= 0 || l > 100) {
+    throw new CustomError("BAD_REQUEST", "limit must be 1~100", 400);
+  }
+
+  const offset = (p - 1) * l;
+
+  // Favorite 기준으로 조회
+  const { rows, count } = await Favorite.findAndCountAll({
+    where: { userId },
+    include: [
+      {
+        model: Store,
+        required: true,
+      },
+    ],
+    limit: l,
+    offset,
+    order: [["createdAt", ord]],
+  });
+
+  return {
+    data: rows.map((fav) => ({
+      id: fav.Store.id,
+      ownerId: fav.Store.ownerId,
+      name: fav.Store.name,
+      category: fav.Store.category,
+      address: fav.Store.address,
+      phone: fav.Store.phone,
+      homepageUrl: fav.Store.homepageUrl,
+      detail: fav.Store.detail,
+      createdAt: fav.Store.createdAt,
+    })),
+    totalCount: count,
+    totalPage: Math.ceil(count / l),
+  };
+};
