@@ -10,7 +10,7 @@ router.patch("/me", authenticate, usersController.updateMe);
 router.get("/:id", authenticate, authenticateRole(["ADMIN"]), usersController.getUserById);
 
 // 사용자, 본인
-router.patch('/me', authenticate, usersController.update);
+router.patch('/me', authenticate, usersController.updateMe);
 
 // router.delete("/me", (req, res) => {});
 

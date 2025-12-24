@@ -1,3 +1,5 @@
+const sequelize = require("../config/sequelize");
+
 const CustomError = require("../responses/customError");
 const { userRepo } = require("../repositories");
 const { reviewRepo, reservationRepo } = require("../repositories");
@@ -24,9 +26,9 @@ exports.getById = async (userId) => {
     return userSaftyRapper(user);
 };
 
-<<<<<<< HEAD
 exports.updateMe = async (userId, payload) => {
   const user = await userRepo.findById(userId);
+
   if (!user) {
     throw new CustomError("NOT_FOUND", "사용자를 찾을 수 없습니다.", 404);
   }
@@ -41,12 +43,8 @@ exports.updateMe = async (userId, payload) => {
   }
 
   // userRepo.update는 update 후 findById 반환함
-  return userRepo.update(userId, updateData);
+  await userRepo.update(userId, updateData);
   const updated = await userRepo.findById(userId);
+
   return userSaftyRapper(updated);
 };
-=======
-exports.update = async (userId, newData) => {
-    
-}
->>>>>>> 247d730 (feat: update users)
