@@ -14,5 +14,6 @@ router.patch("/:storeId", authenticate, authenticateRole(["OWNER", "ADMIN"]), st
 router.get("/:storeId/units", storesController.getStoreUnits);
 router.post("/:storeId/units", authenticate, authenticateRole(["OWNER", "ADMIN"]), storesController.createStoreUnit);
 
+router.get("/:id/reservations", storesController.getStoreReservations);
 router.get("/:id/reviews", storesController.getStoreReviews);
 module.exports = router;

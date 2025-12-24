@@ -195,3 +195,71 @@ exports.createStoreUnit = async (storeId, data, user) => {
   const unit = await reservationUnitRepo.create(payload);
   return unit;
 };
+
+exports.getStoreReservations = async (storeId, { page = 1, limit = 10, order = "desc" } = {}) => {
+  if (!Number.isInteger(page) || page <= 0) page = 1;
+  if (!Number.isInteger(limit) || limit <= 0 || limit > 100) limit = 10;
+  if (!["asc", "desc"].includes(order)) order = "desc";
+
+  const store = await storeRepo.findById(storeId);
+  if (!store) throw new AppError("NOT_FOUND", 404, "Store not found");
+
+  const units = await reservationUnitRepo.findAll(
+    { storeId },
+    { attributes: ["id"] }
+  );
+  if (!units || units.length === 0) return [];
+
+  const unitIds = units.map(u => u.id);
+
+  const offset = (page - 1) * limit;
+
+  const reservations = await reservationRepo.findAll(
+    { unitId: { [Op.in]: unitIds } },
+    {
+      limit,
+      offset,
+      order: [["id", order.toUpperCase()]],
+    }
+  );
+
+  return reservations;
+};
+
+exports.getStoreReviews = async (storeId, { page = 1, limit = 10, order = "desc" } = {}) => {
+  if (!Number.isInteger(page) || page <= 0) page = 1;
+  if (!Number.isInteger(limit) || limit <= 0 || limit > 100) limit = 10;
+  if (!["asc", "desc"].includes(order)) order = "desc";
+
+  const store = await storeRepo.findById(storeId);
+  if (!store) throw new AppError("NOT_FOUND", 404, "Store not found");
+
+  const units = await reservationUnitRepo.findAll(
+    { storeId },
+    { attributes: ["id"] }
+  );
+  if (!units || units.length === 0) return [];
+
+  const unitIds = units.map(u => u.id);
+
+  const reservations = await reservationRepo.findAll(
+    { unitId: { [Op.in]: unitIds } },
+    { attributes: ["id"] }
+  );
+  if (!reservations || reservations.length === 0) return [];
+
+  const reservationIds = reservations.map(r => r.id);
+
+  const offset = (page - 1) * limit;
+
+  const reviews = await reviewRepo.findAll(
+    { reservationId: { [Op.in]: reservationIds } },
+    {
+      limit,
+      offset,
+      order: [["id", order.toUpperCase()]],
+    }
+  );
+
+  return reviews;
+};

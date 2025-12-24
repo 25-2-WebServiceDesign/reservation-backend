@@ -1,4 +1,5 @@
 const storesService = require("../services/stores.service");
+const AppError = require("../responses/AppError");
 
 exports.createStore = async (req, res, next) => {
   try {
@@ -54,11 +55,15 @@ exports.deleteStore = async (req, res, next) => {
 exports.getStoreReviews = async (req, res, next) => {
   const storeId = Number(req.params.id);
   if (!Number.isInteger(storeId) || storeId <= 0) {
-    return next(new AppError("BAD_REQUEST", 400, "storeId is required"));
+    return next(new AppError("BAD_REQUEST", 400, "storeId is invalid"));
   }
 
+  const page = Number(req.query.page ?? 1);
+  const limit = Number(req.query.limit ?? 10);
+  const order = String(req.query.order ?? "desc").toLowerCase(); // asc/desc
+
   try {
-    const reviews = await storesService.getStoreReviews(storeId);
+    const reviews = await storesService.getStoreReviews(storeId, { page, limit, order });
     return res.status(200).json(reviews);
   } catch (err) {
     return next(err);
@@ -114,5 +119,23 @@ exports.createStoreUnit = async (req, res, next) => {
     return res.status(201).json(unit);
   } catch (err) {
     next(err);
+  }
+};
+
+exports.getStoreReservations = async (req, res, next) => {
+  const storeId = Number(req.params.id);
+  if (!Number.isInteger(storeId) || storeId <= 0) {
+    return next(new AppError("BAD_REQUEST", 400, "storeId is invalid"));
+  }
+
+  const page = Number(req.query.page ?? 1);
+  const limit = Number(req.query.limit ?? 10);
+  const order = (req.query.order ?? "desc").toLowerCase(); // asc/desc
+
+  try {
+    const data = await storesService.getStoreReservations(storeId, { page, limit, order });
+    return res.status(200).json(data);
+  } catch (err) {
+    return next(err);
   }
 };
