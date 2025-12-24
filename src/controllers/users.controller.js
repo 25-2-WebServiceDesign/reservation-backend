@@ -37,7 +37,12 @@ exports.getUserById = async (req, res, next) => {
 
 exports.updateMe = async (req, res, next) => {
   if (!req.user || !req.user.id) {
-    return next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+    next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+  }
+  
+  // email, role 은 변경 불가능
+  if (Object.keys(req.body).includes("email") || Object.keys(req.body).includes("role")) {
+    next(new CustomError("FORBIDDEN", "email and role cannot be changed"));
   }
 
   const { nickname, phone, profileImage } = req.body || {};
@@ -45,7 +50,7 @@ exports.updateMe = async (req, res, next) => {
     nickname !== undefined || phone !== undefined || profileImage !== undefined;
 
   if (!hasAny) {
-    return next(new CustomError("BAD_REQUEST", "nothing to update", 400));
+    next(new CustomError("BAD_REQUEST", "nothing to update", 400));
   }
 
   try {
@@ -54,28 +59,25 @@ exports.updateMe = async (req, res, next) => {
       phone,
       profileImage,
     });
-    return res.status(200).json(updated);
+    res.status(200).json(updated);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 };
 
-// exports.update = async (req, res, next) => {
-//     if (!req.user || !req.user.id) {
-//         next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
-//     }
+exports.deleteMe = async (req, res, next) => {
+  // input validation
+  if (!req.user || !req.user.id) {
+    next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+  }
 
-//     const newData = req.body;
-//     const keys = Object.keys(newData);
-
-//     if (keys.includes("email") || keys.includes("role")) {
-//         next(new CustomError("FORBIDDEN", "email and role cannot be changed"));
-//     }
-
-//     try {
-//         const updatedUser = await usersService.update(req.user.id, newData);
-//         res.status(200).json(new ApiResponse({user: updatedUser}));
-//     } catch(err) {
-//         next(err);
-//     }
-// }
+  // 관리자는 제거 불가능 넣을까 말까..
+  
+  // processing
+  try {
+    const data = await usersService.deleteMe(req.user.id);
+    res.status(200).json(new ApiResponse(data));
+  } catch(err) {
+    next(err);
+  }
+}

@@ -12,7 +12,8 @@ router.get("/:id", authenticate, authenticateRole(["ADMIN"]), usersController.ge
 // 사용자, 본인
 router.patch('/me', authenticate, usersController.updateMe);
 
-// router.delete("/me", (req, res) => {});
+// 관리자는 제거 불가
+router.delete("/me", authenticate, usersController.deleteMe);
 
 // admin 등급 필요
 // router.patch("/:id/role", authMiddleware.authenticate, authMiddleware.authenticateRole(["ADMIN"]), userController.changeRole)

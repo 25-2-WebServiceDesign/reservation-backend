@@ -48,3 +48,13 @@ exports.updateMe = async (userId, payload) => {
 
   return userSaftyRapper(updated);
 };
+
+exports.deleteMe = async (userId) => {
+  const affected = await userRepo.remove(userId);
+  
+  if (affected === 0) {
+    throw new CustomError("NOT_FOUND", "user not founed", 404);
+  }
+
+  return {message: "soft delete completed!"}
+}
