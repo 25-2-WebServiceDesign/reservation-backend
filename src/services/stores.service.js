@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const { Store } = require("../models");
-const {storeRepo, reservationRepo, reservationUnitRepo, reviewRepo} = require("../repositories")
+const { storeRepo, reservationRepo, reservationUnitRepo, reviewRepo, favoriteRepo } = require("../repositories")
 
 const AppError = require("../responses/AppError");
 
@@ -262,4 +262,46 @@ exports.getStoreReviews = async (storeId, { page = 1, limit = 10, order = "desc"
   );
 
   return reviews;
+};
+
+// favorite 가게 추가 (멱등)
+exports.addFavorite = async (userId, storeId) => {
+  const id = Number(storeId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "storeId is invalid");
+  }
+
+  const store = await storeRepo.findById(id);
+  if (!store) {
+    throw new AppError("NOT_FOUND", 404, "Store not found");
+  }
+
+  const existing = await favoriteRepo.findByKeys(userId, id, { paranoid: false });
+
+  if (!existing) {
+    const created = await favoriteRepo.create({ userId, storeId: id });
+    return created;
+  }
+
+  if (existing.deletedAt) {
+    await favoriteRepo.restoreByKeys(userId, id);
+    const restored = await favoriteRepo.findByKeys(userId, id);
+    return restored;
+  }
+
+  return existing;
+};
+
+exports.removeFavorite = async (userId, storeId) => {
+  const id = Number(storeId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "storeId is invalid");
+  }
+
+  const store = await storeRepo.findById(id);
+  if (!store) {
+    throw new AppError("NOT_FOUND", 404, "Store not found");
+  }
+
+  await favoriteRepo.removeByKeys(userId, id);
 };

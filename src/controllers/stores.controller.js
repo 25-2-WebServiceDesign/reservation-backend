@@ -139,3 +139,31 @@ exports.getStoreReservations = async (req, res, next) => {
     return next(err);
   }
 };
+
+exports.addFavorite = async (req, res, next) => {
+  const storeId = Number(req.params.id);
+  if (!Number.isInteger(storeId) || storeId <= 0) {
+    return next(new AppError("BAD_REQUEST", 400, "storeId is invalid"));
+  }
+
+  try {
+    const favorite = await storesService.addFavorite(req.user.id, storeId);
+    return res.status(200).json(favorite);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.removeFavorite = async (req, res, next) => {
+  const storeId = Number(req.params.id);
+  if (!Number.isInteger(storeId) || storeId <= 0) {
+    return next(new AppError("BAD_REQUEST", 400, "storeId is invalid"));
+  }
+
+  try {
+    await storesService.removeFavorite(req.user.id, storeId);
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+};

@@ -16,4 +16,8 @@ router.post("/:storeId/units", authenticate, authenticateRole(["OWNER", "ADMIN"]
 
 router.get("/:id/reservations", storesController.getStoreReservations);
 router.get("/:id/reviews", storesController.getStoreReviews);
+
+router.post("/:id/favorites", authenticate, storesController.addFavorite);
+router.delete("/:id/favorites", authenticate, storesController.removeFavorite);
+
 module.exports = router;
