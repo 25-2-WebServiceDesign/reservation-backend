@@ -24,6 +24,7 @@ exports.getById = async (userId) => {
     return userSaftyRapper(user);
 };
 
+<<<<<<< HEAD
 exports.updateMe = async (userId, payload) => {
   const user = await userRepo.findById(userId);
   if (!user) {
@@ -44,3 +45,8 @@ exports.updateMe = async (userId, payload) => {
   const updated = await userRepo.findById(userId);
   return userSaftyRapper(updated);
 };
+=======
+exports.update = async (userId, newData) => {
+    
+}
+>>>>>>> 247d730 (feat: update users)

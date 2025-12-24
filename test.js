@@ -1,5 +1,4 @@
-const a = undefined;
+const a = {a: 1, b: 2}
 
-a = 1;
-
-console.log(a)
+console.log(Object.keys(a))
+console.log(Object.keys)

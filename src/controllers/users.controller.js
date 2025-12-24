@@ -1,4 +1,6 @@
 const CustomError = require("../responses/customError");
+const ApiResponse = require("../responses/ApiResponse");
+
 const usersService = require("../services/users.service");
 
 exports.getMe = async (req, res, next) => {
@@ -16,7 +18,7 @@ exports.getMe = async (req, res, next) => {
 
 exports.getUserById = async (req, res, next) => {
     if (!req.user) {
-        return next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+        next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
     }
 
     const userId = req.params.id;
@@ -32,6 +34,7 @@ exports.getUserById = async (req, res, next) => {
         return next(err);
     }
 }
+<<<<<<< HEAD
 exports.updateMe = async (req, res, next) => {
   if (!req.user || !req.user.id) {
     return next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
@@ -56,3 +59,25 @@ exports.updateMe = async (req, res, next) => {
     return next(err);
   }
 };
+=======
+
+exports.update = async (req, res, next) => {
+    if (!req.user || !req.user.id) {
+        next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+    }
+
+    const newData = req.body;
+    const keys = Object.keys(newData);
+
+    if (keys.includes("email") || keys.includes("role")) {
+        next(new CustomError("FORBIDDEN", "email and role cannot be changed"));
+    }
+
+    try {
+        const updatedUser = await usersService.update(req.user.id, newData);
+        res.status(200).json(new ApiResponse({user: updatedUser}));
+    } catch(err) {
+        next(err);
+    }
+}
+>>>>>>> 247d730 (feat: update users)
