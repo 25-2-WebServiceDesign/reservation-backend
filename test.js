@@ -1,4 +1,5 @@
-const a = {a: 1, b: 2}
+const a = undefined;
+const b = Number("dd");
 
-console.log(Object.keys(a))
-console.log(Object.keys)
+console.log(b)
+console.log(Number.isInteger(b))

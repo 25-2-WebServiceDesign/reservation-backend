@@ -38,8 +38,8 @@ module.exports = {
             if (!userRole) {
                 return next(new CustomError("FORBIDDEN", "No user role information", 403));
             }
-
-            if (allowedRoles.includes(userRole)) {
+            
+            if (!allowedRoles.includes(userRole)) {
                 return next(new CustomError("FORBIDDEN", "No permission to access", 403));
             }
 

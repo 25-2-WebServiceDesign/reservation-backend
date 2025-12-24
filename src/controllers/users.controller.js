@@ -81,3 +81,31 @@ exports.deleteMe = async (req, res, next) => {
     next(err);
   }
 }
+
+exports.changeRole = async (req, res, next) => {
+  // input validation
+  // 이미 관리자 인증 완료 상태
+  const userId = Number(req.params.id);
+  const newRole = req.body?.role;
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    next(new CustomError("BAD_REQUEST", "unsupported userId format", 400));
+  }
+
+  if (!newRole) {
+    next(new CustomError("BAD_REQUEST", "role is not contained in the request body", 400));
+  }
+
+  const supportedRole = ["CUSTOMER", "OWNER"];
+  if (!supportedRole.includes(newRole)) {
+    next(new CustomError("BAD_REQUEST", `unsupported role (supported roles: ${supportedRole})`, 400));
+  }
+
+  // processing
+  try {
+    const data = await usersService.changeRole(userId, newRole);
+    res.status(200).json(new ApiResponse(data));
+  } catch(err) {
+    next(err);
+  }
+}

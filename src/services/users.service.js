@@ -58,3 +58,20 @@ exports.deleteMe = async (userId) => {
 
   return {message: "soft delete completed!"}
 }
+
+exports.changeRole = async (userId, newRole) => {
+  const user = await userRepo.findById(userId);
+
+  if (!user) {
+    throw new CustomError("NOT_FOUND", "user is not founded", 404);
+  }
+
+  // role update
+  const updatedUser = await userRepo.update(userId, {role: newRole});
+
+  if (!updatedUser) {
+    throw new CustomError("NOT_FOUND", "user is not founded", 404);
+  }
+
+  return updatedUser;
+}

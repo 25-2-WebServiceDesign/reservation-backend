@@ -109,3 +109,43 @@
  *       500:
  *         description: 서버 에러
  */
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *  patch:
+ *      tags:
+ *          - Users
+ *      summary: (관리자) 유저 역할 변경 ([OWNER, CUSTOMER] 으로 변경)
+ *      security:
+ *          - bearerAuth: []
+ *      description: 관리자가 사용자의 역할을 변경한다.
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *                type: integer
+ *            description: 유닛 ID
+ *            default: 1
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          role:
+ *                              type: string
+ *                              description: CUSTOMER, OWNER
+ *                              default: OWNER
+ *      responses:
+ *          200:
+ *              description: 업데이트 성공, 혹은 업데이트 할 것이 없음
+ *          401:
+ *              description: 인증 오류
+ *          403:
+ *              description: 권한 없음
+ *          404:
+ *              description: 유저를 찾을 수 없음
+ */
