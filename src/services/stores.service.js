@@ -1,4 +1,5 @@
 const { Op } = require("sequelize");
+const { Store } = require("../models");
 const {storeRepo, reservationRepo, reviewRepo} = require("../repositories")
 
 const AppError = require("../responses/AppError");
@@ -62,4 +63,17 @@ exports.getStoreReviews = async (storeId) => {
   });
 
   return reviews;
+};
+
+exports.getMyStores = async (ownerId) => {
+  if (!ownerId) {
+    throw new AppError("BAD_REQUEST", 400, "ownerId is required");
+  }
+
+  const stores = await Store.findAll({
+    where: { ownerId },
+    order: [["id", "DESC"]],
+  });
+
+  return stores;
 };

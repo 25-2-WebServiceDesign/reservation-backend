@@ -43,7 +43,6 @@ module.exports = {
         );
       }
 
-      // ✅ 포함되면 허용 / 아니면 차단
       if (!allowedRoles.includes(userRole)) {
         return next(
           new CustomError("FORBIDDEN", "No permission to access", 403)

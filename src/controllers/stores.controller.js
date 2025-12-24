@@ -62,3 +62,13 @@ exports.getStoreReviews = async (req, res, next) => {
     return next(err);
   }
 };
+
+exports.getMyStores = async (req, res, next) => {
+  try {
+    const ownerId = req.user.id;
+    const stores = await storesService.getMyStores(ownerId);
+    return res.status(200).json(stores);
+  } catch (err) {
+    next(err);
+  }
+};
