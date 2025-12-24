@@ -78,6 +78,21 @@
  *     security:
  *       - bearerAuth: []
  *     description: 내가 작성한 리뷰 목록을 조회한다. (페이지네이션 가능)
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: 현재 페이지 수
+ *         default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: 페이지당 최대 항목 수
+ *         default: 5
  *     responses:
  *       200:
  *         description: 조회 성공

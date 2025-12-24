@@ -16,6 +16,17 @@ function userSaftyRapper(user) {
     return safeUser;
 }
 
+function reviewSaftyWrapper(review) {
+  const safeReview = {
+    id: review.id,
+    userId: review.userId,
+    reservationId: review.reservationId,
+    rating: review.rating,
+    content: review.content,
+  }
+  return safeReview;
+}
+
 exports.getById = async (userId) => {
     const user = await userRepo.findById(userId);
 
@@ -74,4 +85,28 @@ exports.changeRole = async (userId, newRole) => {
   }
 
   return updatedUser;
+}
+
+exports.getReviews = async (userId, page, limit) => {
+  // read user
+  const user = await userRepo.findById(userId);
+
+  if (!user) {
+    throw new CustomError("UNAUTHORIZED", "authorization context is no longer valid", 401);
+  }
+
+  // read reviews
+  const offset = limit * (page - 1)
+  const {rows, count} = await reviewRepo.findAndCountAll({
+    where: {userId},
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]]
+  })
+
+  return {
+    data: rows.map(reviewSaftyWrapper),
+    totalCount: count,
+    totalPage: Math.ceil(count / limit),
+  }
 }

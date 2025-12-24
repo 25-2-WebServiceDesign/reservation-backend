@@ -109,3 +109,28 @@ exports.changeRole = async (req, res, next) => {
     next(err);
   }
 }
+
+exports.getMyReviews = async (req, res, next) => {
+  // input validation
+  if (!req.user || !req.user.id) {
+    next(new CustomError("UNAUTHORIZED", "No authorization information", 401));
+  }
+
+  const page = req.query.page || 1
+  const limit = req.query.limit || 10
+  console.log(page, limit);
+
+
+  // processing
+  try {
+    const {data, totalCount, totalPage} = await usersService.getReviews(req.user.id);
+    res.status(200).json(new ApiResponse(data, {
+      page,
+      limit,
+      totalCount,
+      totalPage,
+    }))
+  } catch(err) {
+    next(err);
+  }
+}

@@ -16,6 +16,10 @@ async function findAll(where = {}, options = {}) {
   return Review.findAll({ where, ...options });
 }
 
+async function findAndCountAll(options = {}) {
+  return Review.findAndCountAll(options)
+}
+
 async function update(id, data, options = {}) {
   await Review.update(data, { where: { id }, ...options });
   return findById(id);
@@ -34,6 +38,7 @@ module.exports = {
   findById,
   findOne,
   findAll,
+  findAndCountAll,
   update,
   remove,
   restore,

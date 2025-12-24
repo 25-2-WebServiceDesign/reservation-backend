@@ -18,7 +18,7 @@ router.delete("/me", authenticate, usersController.deleteMe);
 // admin 등급 필요
 router.patch("/:id/role", authenticate, authenticateRole(["ADMIN"]), usersController.changeRole)
 
-// router.get('/me/reviews', (req, res) => {});
+router.get('/me/reviews', authenticate, usersController.getMyReviews);
 
 // router.get("/me/favorites", (req, res) => {});
 
