@@ -30,7 +30,6 @@ app.use("/units", unitsRouter);
 app.use("/api/stores", storesRouter);
 app.use("/api/units", unitsRouter);
 app.use("/reviews", reviewsRouter);
-// app.use("/api/reviews", reviewsRouter);
 app.use("/users", usersRouter);
 // app.use("/api/users", usersRouter);
 app.use("/reservations", reservationsRouter);

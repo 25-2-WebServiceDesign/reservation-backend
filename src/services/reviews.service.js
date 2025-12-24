@@ -1,6 +1,8 @@
 const CustomError = require("../responses/customError");
 const { reviewRepo, reservationRepo } = require("../repositories");
 
+const {sequelize} = require("../models")
+
 function badRequest(msg) {
   return new CustomError("BAD_REQUEST", msg, 400);
 }
@@ -14,40 +16,28 @@ function conflict(msg) {
   return new CustomError("CONFLICT", msg, 409);
 }
 
+function reviewSaftyWrapper(review) {
+  return {
+    id: review.id,
+    userId: review.userId,
+    reservationId: review.reservationId,
+    rating: review.rating,
+    content: review.content
+  }
+}
+
 exports.getReviewById = async (id) => {
-  const review = await reviewRepo.findById(id); // ✅ reviewRepository -> reviewRepo
+  const review = await reviewRepo.findById(id);
   if (!review) throw notFound("리뷰 찾을 수 없음");
-  return review;
-};
-
-
-exports.createReview = async (userId, { reservationId, rating, content = null }) => {
-  if (!Number.isInteger(reservationId) || reservationId <= 0) throw badRequest("reservationId is required");
-  if (!Number.isInteger(rating)) throw badRequest("rating is required");
-  if (rating < 0 || rating > 10) throw badRequest("rating must be 0~10");
-
-  const reservation = await reservationRepo.findById(reservationId);
-  if (!reservation) throw notFound("예약을 찾을 수 없음");
-
-  const ownerId = reservation.userId ?? reservation.uid;
-  if (ownerId == null) throw badRequest("reservation owner field is missing");
-  if (String(ownerId) !== String(userId)) throw forbidden("본인 예약에만 리뷰 작성 가능");
-
-  const exists = await reviewRepo.findOne({ reservationId });
-  if (exists) throw conflict("해당 예약에는 이미 리뷰가 작성됨");
-
-  return reviewRepo.create({ userId, reservationId, rating, content });
-};
-
-exports.getMyReviews = async (userId) => {
-  return reviewRepo.findAll({ userId });
+  return reviewSaftyWrapper(review);
 };
 
 
 exports.updateMyReview = async (userId, reviewId, { rating, content }) => {
   const review = await reviewRepo.findById(reviewId);
   if (!review) throw notFound("리뷰 찾을 수 없음");
-  if (String(review.userId) !== String(userId)) throw forbidden("본인 리뷰만 수정 가능");
+
+  if (Number(review.userId) !== Number(userId)) throw forbidden("본인 리뷰만 수정 가능");
 
   const data = {};
   if (rating !== undefined) {
@@ -56,7 +46,16 @@ exports.updateMyReview = async (userId, reviewId, { rating, content }) => {
   }
   if (content !== undefined) data.content = content;
 
-  return reviewRepo.update(reviewId, data);
+  const transaction = await sequelize.transaction();
+
+  try {  
+    const updatedReivew = await reviewRepo.update(reviewId, data, {transaction});
+    await transaction.commit();
+    return updatedReivew;
+  } catch(err) {
+    await transaction.rollback();
+    throw err;
+  }
 };
 
 // 리뷰 삭제(soft delete)
