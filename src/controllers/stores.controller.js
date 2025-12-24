@@ -87,3 +87,32 @@ exports.patchStore = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getStoreUnits = async (req, res, next) => {
+  try {
+    const { page, limit, order } = req.query;
+
+    const units = await storesService.getStoreUnits(req.params.storeId, {
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 20,
+      order: order ? String(order) : "desc",
+    });
+
+    return res.status(200).json(units);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.createStoreUnit = async (req, res, next) => {
+  try {
+    const unit = await storesService.createStoreUnit(
+      req.params.storeId,
+      req.body,
+      req.user
+    );
+    return res.status(201).json(unit);
+  } catch (err) {
+    next(err);
+  }
+};

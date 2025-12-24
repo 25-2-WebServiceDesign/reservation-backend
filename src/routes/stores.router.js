@@ -11,6 +11,8 @@ router.get("/:storeId", storesController.getStoreById);
 //router.put("/:storeId", storesController.updateStore);
 router.delete("/:storeId", authenticate, authenticateRole(["OWNER", "ADMIN"]),storesController.deleteStore);
 router.patch("/:storeId", authenticate, authenticateRole(["OWNER", "ADMIN"]), storesController.patchStore);
+router.get("/:storeId/units", storesController.getStoreUnits);
+router.post("/:storeId/units", authenticate, authenticateRole(["OWNER", "ADMIN"]), storesController.createStoreUnit);
 
 router.get("/:id/reviews", storesController.getStoreReviews);
 module.exports = router;

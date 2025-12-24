@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const { Store } = require("../models");
-const {storeRepo, reservationRepo, reviewRepo} = require("../repositories")
+const {storeRepo, reservationRepo, reservationUnitRepo, reviewRepo} = require("../repositories")
 
 const AppError = require("../responses/AppError");
 
@@ -122,4 +122,76 @@ exports.patchStore = async (storeId, data, user) => {
   }
 
   return storeRepo.update(id, patch);
+};
+
+exports.getStoreUnits = async (storeId, { page = 1, limit = 20, order = "desc" } = {}) => {
+  const id = Number(storeId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "storeId is invalid");
+  }
+
+  const p = Number(page);
+  const l = Number(limit);
+
+  if (!Number.isInteger(p) || p <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "page must be a positive integer");
+  }
+  if (!Number.isInteger(l) || l <= 0 || l > 100) {
+    throw new AppError("BAD_REQUEST", 400, "limit must be 1~100");
+  }
+
+  const ord = String(order || "desc").toLowerCase();
+  if (ord !== "asc" && ord !== "desc") {
+    throw new AppError("BAD_REQUEST", 400, "order must be asc or desc");
+  }
+
+  const store = await storeRepo.findById(id);
+  if (!store) {
+    throw new AppError("NOT_FOUND", 404, "Store not found");
+  }
+
+  const offset = (p - 1) * l;
+
+  const units = await reservationUnitRepo.findAll(
+    { storeId: id },
+    {
+      limit: l,
+      offset,
+      order: [["id", ord.toUpperCase()]],
+    }
+  );
+
+  return units;
+};
+
+exports.createStoreUnit = async (storeId, data, user) => {
+  const id = Number(storeId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError("BAD_REQUEST", 400, "storeId is invalid");
+  }
+
+  const store = await storeRepo.findById(id);
+  if (!store) {
+    throw new AppError("NOT_FOUND", 404, "Store not found");
+  }
+
+  if (user?.role !== "ADMIN" && store.ownerId !== user?.id) {
+    throw new AppError("FORBIDDEN", 403, "No permission to create unit for this store");
+  }
+
+  const payload = {
+    ...data,
+    storeId: id,
+  };
+
+  if (!payload.name) {
+    throw new AppError("VALIDATION_ERROR", 400, "name is required");
+  }
+
+  if(!payload.description) {
+    throw new AppError("VALIDATION_ERROR", 400, "description is required");
+  }
+
+  const unit = await reservationUnitRepo.create(payload);
+  return unit;
 };
