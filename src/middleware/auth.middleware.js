@@ -3,7 +3,7 @@ const jwtUtils = require("../utils/jwt.util");
 
 module.exports = {
     authenticate(req, res, next) {
-        const authHeader = req.get("authorization");
+        const authHeader = req.get("Authorization");
 
         if(!authHeader) {
             next(new CustomError("UNAUTHORIZED", "Authorization header is required", 401));
@@ -19,6 +19,7 @@ module.exports = {
         try {
             const decoded = jwtUtils.verifyAccessToken(token);
             req.user = decoded;
+            next();
         } catch(err) {
             next(new CustomError("UNAUTHORIZED", "JWT token is invalid", 401));
         }
