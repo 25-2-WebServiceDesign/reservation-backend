@@ -1,10 +1,10 @@
-const { sequelize } = require("../models");
+const { sequelize, Sequelize } = require("../models");
 
 const CustomError = require("../responses/customError")
 
-const {reservationUnitRepo, storeRepo, reservationPolicyRepo, operatingHourRepo} = require("../repositories")
+const {reservationUnitRepo, storeRepo, reservationPolicyRepo, operatingHourRepo, reservationRepo} = require("../repositories")
 
-// const { Op } = require("sequelize");
+const { Op } = require("sequelize");
 // 소유 확인하는 메서드
 async function verifyUnitOwner(unitId, userId, transaction = null) {
   const unit = await reservationUnitRepo.findById(unitId, {transaction});
@@ -172,3 +172,88 @@ exports.replaceBusinessHour = async (unitId, userId, payload) => {
     throw err;
   }
 }
+
+function toMinutes(timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function toTimeString(minutes) {
+  const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const m = String(minutes % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+exports.getUnitAvailability = async ({ unitId, date }) => {
+  // unit 확인
+  const unit = await reservationUnitRepo.findById(unitId);
+  if (!unit) {
+    throw new CustomError("NOT_FOUND", "unit not found", 404);
+  }
+
+  // policy 확인
+  const policy = await reservationPolicyRepo.findOne({ unitId });
+  if (!policy) return [];
+
+  const slotDuration = policy.slotDuration;
+
+  // 요일 계산
+  const targetDate = new Date(`${date}T00:00:00+09:00`);
+  const dayOfWeekMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const dayOfWeek = dayOfWeekMap[targetDate.getDay()];
+
+  // 운영시간
+  const operatingHour = await operatingHourRepo.findOne({
+    policyId: policy.id,
+    dayOfWeek,
+  });
+  if (!operatingHour) return [];
+
+  // 날짜 범위 계산 (KST)
+  const startOfDay = new Date(`${date}T00:00:00+09:00`);
+  const endOfDay = new Date(`${date}T23:59:59+09:00`);
+
+  // 예약 조회
+  const reservations = await reservationRepo.findAll({
+    unitId,
+    status: { [Op.in]: ["PENDING", "CONFIRMED"] },
+    startTime: { [Op.between]: [startOfDay, endOfDay] },
+  });
+
+  // 분 단위 변환
+  const openMinutes = toMinutes(operatingHour.openTime);
+  const closeMinutes = toMinutes(operatingHour.closeTime);
+
+  const reservedRanges = reservations.map(r => ({
+    start: toMinutes(r.startTime.toISOString().slice(11, 16)),
+    end: toMinutes(r.endTime.toISOString().slice(11, 16)),
+  }));
+
+  // 슬롯 생성
+  const availableSlots = [];
+
+  for (
+    let t = openMinutes;
+    t + slotDuration <= closeMinutes;
+    t += slotDuration
+  ) {
+    const overlap = reservedRanges.some(
+      r => t < r.end && t + slotDuration > r.start
+    );
+
+    if (!overlap) {
+      availableSlots.push(toTimeString(t));
+    }
+  }
+
+  // 오늘이면 과거 시간 제거
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+
+  if (date === todayStr) {
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return availableSlots.filter(t => toMinutes(t) > nowMinutes);
+  }
+
+  return availableSlots;
+};
