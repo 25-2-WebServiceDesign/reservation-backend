@@ -28,6 +28,7 @@ exports.getStoreById = async (req, res, next) => {
   }
 };
 
+/*
 exports.updateStore = async (req, res, next) => {
   try {
     const store = await storesService.updateStore(
@@ -39,6 +40,7 @@ exports.updateStore = async (req, res, next) => {
     next(err);
   }
 };
+*/
 
 exports.deleteStore = async (req, res, next) => {
   try {
@@ -68,6 +70,19 @@ exports.getMyStores = async (req, res, next) => {
     const ownerId = req.user.id;
     const stores = await storesService.getMyStores(ownerId);
     return res.status(200).json(stores);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.patchStore = async (req, res, next) => {
+  try {
+    const updated = await storesService.patchStore(
+      req.params.storeId,
+      req.body,
+      req.user
+    );
+    return res.status(200).json(updated);
   } catch (err) {
     next(err);
   }
