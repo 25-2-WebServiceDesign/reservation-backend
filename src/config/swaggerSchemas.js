@@ -19,6 +19,46 @@ const responseForm = (data, meta = {}) => {
 };
 
 module.exports = {
+    ReservationCreate: {
+        type: 'object',
+        properties: {
+            startTime: {
+                type: "string",
+                default: "2025-08-01T14:00:00+00:00",
+            },
+            headcount: {
+                type: 'integer',
+                default: 1,
+            },
+            memo: {
+                type: "string"
+            }
+        }
+    },
+    BusinessHour: {
+        $ref: "#/components/schemas/ReservationPolicy"
+    },
+    UnitsUpdate: {
+        type: "object",
+        properties: {
+            name: {
+                type: "string",
+                default: "store name"
+            },
+            description: {
+                type: "string",
+                default: "store description"
+            },
+            profileImage: {
+                type: "string",
+                default: null
+            },
+            detailUrl: {
+                type: "string",
+                default: null
+            }
+        }
+    },
     StoreCreate: {
         $ref: "#/components/schemas/Store"
     },

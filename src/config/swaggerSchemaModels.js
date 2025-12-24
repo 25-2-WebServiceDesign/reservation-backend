@@ -1,4 +1,65 @@
+
 module.exports = {
+    ReservationPolicy: {
+        type: 'object',
+        properties: {
+            slotDuration: {
+                type: 'integer',
+                default: 30,
+            },
+            maximumHeadcount: {
+                type: 'integer',
+                default: 1
+            },
+            operatingHours: {
+                type: 'array',
+                items: {
+                    $ref: "#/components/schemas/OperatingHour"
+                }
+            }
+        }
+    },
+    OperatingHour: {
+        type: "object",
+        properties: {
+            dayOfWeek: {
+                type: 'string',
+                enum: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+                default: "MON",
+            },
+            openTime: {
+                type: 'string',
+                default: "09:00"
+            },
+            closeTime: {
+                type: 'string',
+                default: "18:00"
+            }
+        }
+    },
+    ReservationUnit: {
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+            },
+            storeId: {
+                type: 'integer'
+            },
+            name: {
+                type: 'string',
+            },
+            description: {
+                type: 'string'
+            },
+            profileImage: {
+                type: "string"
+            },
+            detailUrl: {
+                type: 'string'
+            }
+        }
+    },
     Store: {
         type: "object",
         properties: {

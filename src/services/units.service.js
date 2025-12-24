@@ -28,7 +28,7 @@ async function verifyUnitOwner(unitId, userId, transaction = null) {
 exports.getUnitById = async (unitId) => {
   const unit = await reservationUnitRepo.findById(unitId);
   if (!unit) {
-    throw new AppError("NOT_FOUND", 404, "Unit not found");
+    throw new CustomError("NOT_FOUND", "Unit not found", 404);
   }
   return unit;
 };
