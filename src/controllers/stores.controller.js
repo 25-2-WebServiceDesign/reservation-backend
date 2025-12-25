@@ -90,7 +90,7 @@ exports.getMyStores = async (req, res, next) => {
 
   try {
     const {data, totalCount, totalPage} = await storesService.getMyStores(ownerId, page, limit);
-    return res.status(200).json(new ApiResponse({data}, {
+    return res.status(200).json(new ApiResponse({stores: data}, {
       page,
       limit,
       totalCount,
@@ -118,13 +118,13 @@ exports.getStoreUnits = async (req, res, next) => {
   try {
     const { page, limit, order } = req.query;
 
-    const units = await storesService.getStoreUnits(req.params.storeId, {
+    const {units, totalCount, totalPage} = await storesService.getStoreUnits(req.params.storeId, {
       page: page ? Number(page) : 1,
       limit: limit ? Number(limit) : 20,
       order: order ? String(order) : "desc",
     });
 
-    return res.status(200).json(units);
+    return res.status(200).json(new ApiResponse({units}, {page, limit, totalCount, totalPage}));
   } catch (err) {
     next(err);
   }

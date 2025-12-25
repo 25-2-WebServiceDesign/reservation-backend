@@ -121,6 +121,21 @@
  *     tags:
  *       - Users
  *     summary: 관심가게 조회
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: 현재 페이지 수
+ *         default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: 페이지당 최대 항목 수
+ *         default: 5
  *     security:
  *       - bearerAuth: []
  *     description: 내가 즐겨찾기한 가게 목록을 조회한다.
