@@ -77,7 +77,7 @@
  *       401:
  *         description: 인증 필요
  *       404:
- *         description: 예약을 찾을 수 없음
+ *         description: 예약이 없거나 접근 권한이 없는 경우
  *       500:
  *         description: 서버 에러
  */
