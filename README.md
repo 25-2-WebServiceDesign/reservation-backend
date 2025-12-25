@@ -16,10 +16,14 @@ Reservation Service는 식당·숙소·스토어 등 다양한 업종에서 사�
 
 
 ## 실행 가이드
+| redis 를 구축하고 연결해야 하는 번거로움이 있기 때문에 docker 로 한번에 실행하는 것을 추천!
+
 - node 실행
-  1. `.env` 파일 형식에 맞도록 채우기 (ex: `.env.example`)
-  2. `npm install`
-  3. `node src/server.js`
+  1. redis 환경 구축
+  2. `.env` 파일 형식에 맞도록 채우기 (ex: `.env.example`)
+  3. `npm install`
+  4. redis 
+  5. `node src/server.js` or `npm start`
 - docker 실행
   1. `.env` 파일 형식에 맞도록 채우기 (ex: `.env.example`)
   2. `docker-compose up -d --build`
