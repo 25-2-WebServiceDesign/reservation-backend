@@ -39,10 +39,28 @@ async function deleteToken(key) {
   return await redisClient.del(key);
 }
 
+async function revokeRefreshToken(userId, refreshToken) {
+  await connectRedis();
+
+  const key = rtKey(userId);
+  const storedToken = await redisClient.get(key);
+
+  // Redis에 토큰이 없으면 그냥 종료
+  if (!storedToken) return false;
+
+  // 다른 토큰이면 삭제하지 않음 (안전장치)
+  if (storedToken !== refreshToken) return false;
+
+  await redisClient.del(key);
+  return true;
+}
+
+
 module.exports = {
   storeRefreshToken,
   getRefreshToken,
   deleteRefreshToken,
+  revokeRefreshToken,
   setToken,
   getToken,
   deleteToken,
