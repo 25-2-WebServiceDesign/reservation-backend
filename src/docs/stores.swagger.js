@@ -91,8 +91,6 @@
  *          - Stores
  *      summary: 가게 상세 조회
  *      description: 가게 상세 조회
- *      security:
- *          - bearerAuth: []
  *      parameters:
  *          - in: path
  *            name: id
@@ -115,9 +113,7 @@
  *      tags:
  *          - Stores
  *      summary: 가게 유닛들 조회
- *      description: 가게 유닛들 조회 - 추후 페이지네이션 적용
- *      security:
- *          - bearerAuth: []
+ *      description: 가게 유닛들 조회
  *      parameters:
  *          - in: path
  *            name: id
@@ -126,6 +122,18 @@
  *                type: integer
  *            description: 가게 ID
  *            default: 1
+ *          - in: query
+ *            name: page
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 1
+ *          - in: query
+ *            name: limit
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 5
  *      responses:
  *          200:
  *              description: ok 가게 상세 조회 성공
@@ -249,7 +257,7 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/StoreUpdate"
+ *             $ref: "#/components/schemas/StoreCreate"
  *     responses:
  *       200:
  *         description: ok 가게 정보 업데이트 성공

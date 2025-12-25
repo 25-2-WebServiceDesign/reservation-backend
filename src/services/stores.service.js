@@ -35,7 +35,7 @@ exports.getStores = async (page, limit) => {
   });
 
   return {
-    data: rows.map(r => storeSaftyWrapper),
+    data: rows.map(r => storeSaftyWrapper(r)),
     totalCount: count,
     totalPage: Math.ceil(count / limit),
   };
@@ -124,7 +124,7 @@ exports.getMyStores = async (ownerId, page, limit) => {
   });
 
   return {
-    data: rows.map(r => storeSaftyWrapper),
+    data: rows.map(r => storeSaftyWrapper(r)),
     totalCount: count,
     totalPage: Math.ceil(count / safeLimit),
   };
@@ -201,16 +201,14 @@ exports.getStoreUnits = async (storeId, { page = 1, limit = 20, order = "desc" }
 
   const offset = (p - 1) * l;
 
-  const units = await reservationUnitRepo.findAll(
-    { storeId: id },
-    {
-      limit: l,
-      offset,
-      order: [["id", ord.toUpperCase()]],
-    }
-  );
+  const {cols, totalCount} = await reservationUnitRepo.findAndCountAll({
+    where: {storeId: id},
+    limit,
+    offset,
+    order: [["createdAt", ord]],
+  })
 
-  return units;
+  return {units: cols, totalCount, totalPage: Math.ceil(totalCount / limit)};
 };
 
 exports.createStoreUnit = async (storeId, data, user) => {
