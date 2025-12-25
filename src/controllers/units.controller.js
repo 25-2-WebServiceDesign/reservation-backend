@@ -127,7 +127,7 @@ exports.delete = async (req, res, next) => {
 
   try {
     const data = await unitsService.delete(unitId, userId);
-    res.status(200).json(data);
+    res.status(200).json(new ApiResponse(data));
   } catch(err) {
     next(err);
   }
