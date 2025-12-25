@@ -18,7 +18,7 @@ exports.getStores = async (req, res, next) => {
 
   try {
     const {data, totalCount, totalPage} = await storesService.getStores(page, limit);
-    res.status(200).json(new ApiResponse({data}, {
+    res.status(200).json(new ApiResponse({stores: data}, {
       page,
       limit,
       totalCount,
