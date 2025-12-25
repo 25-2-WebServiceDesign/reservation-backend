@@ -103,7 +103,7 @@ module.exports = {
                 provider: "NAVER",
             }, {transaction})
 
-            let user = await userRepo.findById(userAuth.userId, {transaction});
+            let user = await userRepo.findById(userAuth?.userId, {transaction});
 
             // 없으면 유저 생성
             if (!user) {
