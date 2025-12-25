@@ -34,6 +34,14 @@
  *           schema:
  *             type: object
  *             description: 수정할 필드만 전달 (예 - nickname 등)
+ *             properties: 
+ *                  nickname: 
+ *                      type: string
+ *                  phone:
+ *                      type: string
+ *                      default: "+821012341234"
+ *                  profileImage: 
+ *                      type: string
  *     responses:
  *       200:
  *         description: 수정 성공

@@ -59,8 +59,33 @@ module.exports = {
             }
         }
     },
-    StoreCreate: {
-        $ref: "#/components/schemas/Store"
+    StoreCreate: {        
+        type: "object",
+        properties: {
+            name: {
+                type: "string",
+                default: "잘나가는 식당",
+            },
+            address: {
+                type: "string",
+            },
+            phone: {
+                type: "string",
+                default: "+821012341234"
+            },
+            category: {
+                type: "string",
+                default: "resturant"
+            },
+            homepageUrl: {
+                type: "string",
+                default: null
+            },
+            detail: {
+                type: "string",
+                default: " "
+            }
+        }
     },
     GetAllReviews: responseForm(
         {
