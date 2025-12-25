@@ -1,228 +1,290 @@
 const firebaseAdmin = require("../config/firebase");
 const { sequelize } = require("../models");
-const { userAuthRepo, userRepo, refreshTokenRepo } = require('../repositories')
+const { userAuthRepo, userRepo, refreshTokenRepo } = require("../repositories");
 
-const CustomError = require("../responses/customError")
+const {
+  storeRefreshToken,
+  existsRefreshToken,
+  revokeRefreshToken,
+} = require("./tokenCache.service");
+
+const CustomError = require("../responses/customError");
 
 async function getJWTTokens(user, transaction) {
-    const jwtUtil = require("../utils/jwt.util");
+  const jwtUtil = require("../utils/jwt.util");
 
-    const accessToken = jwtUtil.generateAccessToken({id: user.id, role: user.role});
-    const refreshToken = jwtUtil.generateRefreshToken(user.id);
+  const accessToken = jwtUtil.generateAccessToken({
+    id: user.id,
+    role: user.role,
+  });
+  const refreshToken = jwtUtil.generateRefreshToken(user.id);
 
-    // refresh Token 재설정
-    await refreshTokenRepo.create({
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(jwtUtil.verifyRefreshToken(refreshToken).exp * 1000),
-    }, {transaction});
+  const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+  const expiresAt = new Date(decoded.exp * 1000);
 
-    const expiresIn = jwtUtil.accessTokenExpiresIn;
+  // DB 저장
+  await refreshTokenRepo.create(
+    {
+      userId: user.id,
+      token: refreshToken,
+      expiresAt,
+    },
+    { transaction }
+  );
 
-    return {
-        user,
-        accessToken,
-        refreshToken,
-        expiresIn,
-    }
+  // Redis 저장 (TTL)
+  const ttlSec = Math.max(
+    1,
+    Math.floor(expiresAt.getTime() / 1000 - Date.now() / 1000)
+  );
+  await storeRefreshToken(user.id, refreshToken, ttlSec);
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+    expiresIn: jwtUtil.accessTokenExpiresIn,
+  };
 }
-
 
 module.exports = {
-    async googleLogin(idToken) {
-        // firebase_config.json 없어서 추가
-        if(!firebaseAdmin) {
-            throw new CustomError(
-                "SERVICE_UNAVAILABLE",
-                "Firebase authentication is not configured",
-                503
-            );
-        }
-        const transaction = await sequelize.transaction();
-        const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+  async googleLogin(idToken) {
+    if (!firebaseAdmin) {
+      throw new CustomError(
+        "SERVICE_UNAVAILABLE",
+        "Firebase authentication is not configured",
+        503
+      );
+    }
 
-        try {
-            const userAuth = await userAuthRepo.findOne({
-                provider: "GOOGLE",
-                providerUid: decoded.uid,
-            }, {transaction});
+    const transaction = await sequelize.transaction();
+    try {
+      const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
 
-            let user = await userRepo.findById(userAuth?.userId, {transaction});
+      const userAuth = await userAuthRepo.findOne(
+        {
+          provider: "GOOGLE",
+          providerUid: decoded.uid,
+        },
+        { transaction }
+      );
 
-            // 유저가 없으면 회원가입
-            if (!user) {
-                const userData = {
-                    nickname: decoded.name,
-                    email: decoded.email,
-                    phone: decoded.phone_number || null,
-                    profileImage: decoded.picture,
-                }
-                // User 새로 생성
-                user = await userRepo.create(userData, {transaction});
+      let user = await userRepo.findById(userAuth?.userId, { transaction });
 
-                // Auth 새로 생성
-                await userAuthRepo.create({
-                    userId: user.id,
-                    provider: "GOOGLE",
-                    providerUid: decoded.uid,
-                }, {transaction});
-            }
+      if (!user) {
+        user = await userRepo.create(
+          {
+            nickname: decoded.name,
+            email: decoded.email,
+            phone: decoded.phone_number || null,
+            profileImage: decoded.picture,
+          },
+          { transaction }
+        );
 
-            // refreshToken 이 이미 있는지 확인 (있다면 비활성화하고 새로 반환)
-            const refreshTokens = await refreshTokenRepo.findAll({
-                userId: user.id,
-                revokedAt: null,
-            }, {transaction});
+        await userAuthRepo.create(
+          {
+            userId: user.id,
+            provider: "GOOGLE",
+            providerUid: decoded.uid,
+          },
+          { transaction }
+        );
+      }
 
-            for (const token of refreshTokens) {
-                await refreshTokenRepo.update(
-                    token.id, 
-                    {revokedAt: new Date()}, 
-                    {transaction}
-                )
-            }
-            
+      // 기존 refreshToken 전부 폐기 (DB + Redis)
+      const refreshTokens = await refreshTokenRepo.findAll(
+        {
+          userId: user.id,
+          revokedAt: null,
+        },
+        { transaction }
+      );
 
-            const resData = await getJWTTokens(user, transaction);
+      for (const token of refreshTokens) {
+        await refreshTokenRepo.update(
+          token.id,
+          { revokedAt: new Date() },
+          { transaction }
+        );
+        await revokeRefreshToken(user.id, token.token);
+      }
 
-            await transaction.commit();
-            return resData;
-        } catch(err) {
-            await transaction.rollback()
-            throw new CustomError("Internal_Server_Error", "DB query error", 500);
-        }
-    },
+      const resData = await getJWTTokens(user, transaction);
+      await transaction.commit();
+      return resData;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  },
 
-    async naverLogin(profile) {
-        const transaction = await sequelize.transaction();
+  async naverLogin(profile) {
+    const transaction = await sequelize.transaction();
+    try {
+      const userAuth = await userAuthRepo.findOne(
+        {
+          provider: "NAVER",
+          providerUid: profile.id,
+        },
+        { transaction }
+      );
 
-        try {
-            // id 확인
-            const userAuth = await userAuthRepo.findOne({
-                providerUid: profile.id,
-                provider: "NAVER",
-            }, {transaction})
+      let user = await userRepo.findById(userAuth?.userId, { transaction });
 
-            let user = await userRepo.findById(userAuth?.userId, {transaction});
+      if (!user) {
+        user = await userRepo.create(
+          {
+            nickname: profile.name,
+            email: profile.email,
+            phone: profile.mobile_e164,
+            profileImage: profile.profile_image,
+          },
+          { transaction }
+        );
 
-            // 없으면 유저 생성
-            if (!user) {
-                const userData = {
-                    nickname: profile.name,
-                    email: profile.email,
-                    phone: profile.mobile_e164,
-                    profileImage: profile.profile_image,
-                }
+        await userAuthRepo.create(
+          {
+            userId: user.id,
+            provider: "NAVER",
+            providerUid: profile.id,
+          },
+          { transaction }
+        );
+      }
 
-                user = await userRepo.create(userData, {transaction});
+      // 기존 refreshToken 전부 폐기 (DB + Redis)
+      const refreshTokens = await refreshTokenRepo.findAll(
+        {
+          userId: user.id,
+          revokedAt: null,
+        },
+        { transaction }
+      );
 
-                // Auth 새로 생성
-                await userAuthRepo.create({
-                    userId: user.id,
-                    provider: "NAVER",
-                    providerUid: profile.id,
-                }, {transaction});
-            }
+      for (const token of refreshTokens) {
+        await refreshTokenRepo.update(
+          token.id,
+          { revokedAt: new Date() },
+          { transaction }
+        );
+        await revokeRefreshToken(user.id, token.token);
+      }
 
+      const resData = await getJWTTokens(user, transaction);
+      await transaction.commit();
+      return resData;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  },
 
-            // refreshToken 이 이미 있는지 확인 (있다면 비활성화하고 새로 반환)
-            const refreshTokens = await refreshTokenRepo.findAll({
-                userId: user.id,
-                revokedAt: null,
-            }, {transaction});
+  async refresh(refreshToken) {
+    const jwtUtil = require("../utils/jwt.util");
 
-            for (const token of refreshTokens) {
-                await refreshTokenRepo.update(
-                    token.id, 
-                    {revokedAt: new Date()}, 
-                    {transaction}
-                )
-            }
+    const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+    if (!decoded) {
+      throw new CustomError(
+        "UNAUTHORIZED",
+        "refreshToken is expired or invalid",
+        401
+      );
+    }
 
-            const resData = await getJWTTokens(user, transaction);
+    // Redis 1차 검증
+    const inRedis = await existsRefreshToken(decoded.id, refreshToken);
+    if (!inRedis) {
+      throw new CustomError(
+        "UNAUTHORIZED",
+        "refreshToken is revoked or expired (redis)",
+        401
+      );
+    }
 
-            await transaction.commit();
-            return resData;
-        } catch(err) {
-            await transaction.rollback()
-            throw err
-        }
-    },
+    const transaction = await sequelize.transaction();
+    try {
+      const token = await refreshTokenRepo.findOne(
+        {
+          token: refreshToken,
+          userId: decoded.id,
+        },
+        { transaction }
+      );
 
-    async refresh(refreshToken) {
-        // refreshToken 검증
-        const jwtUtil = require("../utils/jwt.util");
-        const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+      if (!token || token.revokedAt) {
+        throw new CustomError(
+          "UNAUTHORIZED",
+          "refreshToken is not found in DB",
+          401
+        );
+      }
 
-        if (!decoded) {
-            throw new CustomError("UNAUTHORIZED", "refreshToken is expired or invalid", 401)
-        }
+      // 기존 refreshToken 폐기 (DB + Redis)
+      await refreshTokenRepo.update(
+        token.id,
+        { revokedAt: new Date() },
+        { transaction }
+      );
+      await revokeRefreshToken(decoded.id, refreshToken);
 
-        const transaction = await sequelize.transaction()
-        try {
-            // refreshToken Table에서 찾기
-            const token = await refreshTokenRepo.findOne({
-                token: refreshToken,
-                userId: decoded.id,
-            }, {transaction});
+      const user = await userRepo.findById(decoded.id, { transaction });
+      if (!user) {
+        throw new CustomError("UNAUTHORIZED", "user not found", 401);
+      }
 
-            if (!token || token.revokedAt) {
-                throw new CustomError("NOT_FOUND", "refreshToken is not founded in DB", 401);
-            }
-            // 비활성화
-            await refreshTokenRepo.update(token.id, {
-                revokedAt: new Date()
-            }, {transaction});
+      const resData = await getJWTTokens(user, transaction);
+      await transaction.commit();
+      return resData;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  },
 
-            // 재발급
-            const user = await userRepo.findById(decoded.id, {transaction});
+  async logout(refreshToken) {
+    const jwtUtil = require("../utils/jwt.util");
 
-            if (!user) {
-                throw new CustomError("UNAUTHORIZED", "user is not founded", 401);
-            }
+    const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+    if (!decoded) {
+      throw new CustomError(
+        "UNAUTHORIZED",
+        "refreshToken is expired or invalid",
+        401
+      );
+    }
 
-            const resData = await getJWTTokens(user, transaction);
+    const transaction = await sequelize.transaction();
+    try {
+      const token = await refreshTokenRepo.findOne(
+        {
+          token: refreshToken,
+          userId: decoded.id,
+        },
+        { transaction }
+      );
 
-            await transaction.commit()
-            return resData;
-        } catch(err) {
-            await transaction.rollback()
-            throw err
-        }
-    },
+      if (!token || token.revokedAt) {
+        throw new CustomError(
+          "UNAUTHORIZED",
+          "refreshToken is not found in DB",
+          401
+        );
+      }
 
-    async logout(refreshToken) {
-        const jwtUtil = require("../utils/jwt.util");
-        const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+      // 폐기 (DB + Redis)
+      await refreshTokenRepo.update(
+        token.id,
+        { revokedAt: new Date() },
+        { transaction }
+      );
+      await revokeRefreshToken(decoded.id, refreshToken);
 
-        if (!decoded) {
-            throw new CustomError("UNAUTHORIZED", "refreshToken is expired or invalid", 401)
-        }
-
-        const transaction = await sequelize.transaction();
-        try {
-            // refreshToken 테이블에서 찾기
-            const token = await refreshTokenRepo.findOne({
-                token: refreshToken,
-                userId: decoded.id
-            }, {transaction});
-
-            if (!token || token.revokedAt) {
-                throw new CustomError("UNAUTHORIZED", "refreshToken is not founded in DB", 401);
-            }
-
-            // 비활성화
-            await refreshTokenRepo.update(token.id, {
-                revokedAt: new Date()
-            }, {transaction});
-
-            await transaction.commit();
-            return {message: "logout completed!"}
-
-        } catch(err) {
-            await transaction.rollback()
-            throw err;
-        }
-
-    },
-}
+      await transaction.commit();
+      return { message: "logout completed!" };
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  },
+};

@@ -1,10 +1,11 @@
 const express = require("express");
 const app = express();
-
+const rateLimiter = require("./middleware/rateLimiter");
 const swaggerSpec = require("./config/swagger")
 const expressUi = require("swagger-ui-express")
 
 // router 불러오기
+const healthRouter = require("./routes/health.router");
 const naverAuthRouter = require("./routes/authNaver.router");
 const firebaseAuthRouter = require("./routes/authFirebse.router");
 const authRouter = require("./routes/auth.router");
@@ -16,12 +17,15 @@ const unitsRouter = require("./routes/units.router");
 const reviewsRouter = require("./routes/reviews.router");
 const usersRouter = require("./routes/users.router");
 const reservationsRouter = require("./routes/reservations.router");
-
+const requestLogger = require("./middleware/requestLogger");
 const errorHandler = require('./middleware/errorHandler')
 
 app.use(express.json());
 
 // routers 연결
+app.use("/health", healthRouter);
+app.use(rateLimiter({ windowMs: 60_000, max: 120 }));
+app.use(requestLogger);
 app.use('/auth', authRouter)
 app.use("/auth/naver", naverAuthRouter)
 app.use("/auth/firebase", firebaseAuthRouter)

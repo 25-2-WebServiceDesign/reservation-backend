@@ -1,113 +1,136 @@
 /**
  * @swagger
- * /auth/naver/login:
- *  get:
- *      tags:
- *          - Auth
- *      summary: naver login - swagger, postman 테스트 X (브라우저에서 테스트!)
- *      description: 네이버 로그인
- *      responses:
- *          200:
- *              description: 네이버 로그인 성공 (계정이 없다면 회원가입 후 생성)
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: "#/components/schemas/LoginResponse"
- *          400:
- *              description: 네이버 로그인 실패
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: "#/components/schemas/StandardError"
+ * tags:
+ *   name: Auth
+ *   description: 인증 및 인가 API
  */
 
 /**
  * @swagger
- * /auth/naver/callback:
- *  get:
- *      tags:
- *          - Auth
- *      summary: naver login callback - 직접 사용 X (네이버 인증에서 사용)
- *      description: 네이버 로그인
+ * components:
+ *   schemas:
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         user:
+ *           type: object
+ *           description: 사용자 정보
+ *         accessToken:
+ *           type: string
+ *         refreshToken:
+ *           type: string
+ *         expiresIn:
+ *           type: number
  */
 
 /**
  * @swagger
  * /auth/refresh:
- *  post:
- *      tags:
- *          - Auth
- *      summary: JWT 토큰 재발급
- *      requestBody: 
- *          required: true
- *          content:
- *              application/json:
- *                  schema:
- *                      type: object
- *                      properties:
- *                          refreshToken:
- *                              type: string
- *                              description: 리프레시 토큰
- *      responses:
- *          200:
- *              description: "재발금 성공"
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: "#/components/schemas/LoginResponse"
- */
-
-/**
- * @swagger
- * /auth/firebase/google:
- *  get:
- *      tags:
- *          - Auth
- *      summary: firebase google 로그인을 위한 링크 (웹 브라우저에서 실행)
- *      description: post /auth/firebase/login body 에 idToken 을 담아서 로그인 요청 결과를 브라우저에 출력
- */
-
-/**
- * @swagger
- * /auth/firebase/login:
- *  post:
- *      tags: 
- *          - Auth
- *      summary: firebase 로그인 API
- *      description: firebase 의 idToken 을 body 에서 받아서 로그인 처리
- *      requestBody: 
- *          required: true
- *          content:
- *              application/json:
- *                  schema:
- *                      type: object
- *                      properties:
- *                          idToken:
- *                              type: string
- *                          description: firebase idToken
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: JWT 토큰 재발급
+ *     description: Refresh Token을 이용해 Access Token과 Refresh Token을 재발급한다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh Token
+ *     responses:
+ *       200:
+ *         description: 재발급 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/LoginResponse"
+ *       400:
+ *         description: BAD_REQUEST
+ *       401:
+ *         description: UNAUTHORIZED (토큰 만료/위조)
+ *       409:
+ *         description: DUPLICATE_RESOURCE / STATE_CONFLICT
+ *       422:
+ *         description: UNPROCESSABLE_ENTITY
+ *       429:
+ *         description: TOO_MANY_REQUESTS
+ *       500:
+ *         description: INTERNAL_SERVER_ERROR
+ *       503:
+ *         description: SERVICE_UNAVAILABLE
  */
 
 /**
  * @swagger
  * /auth/logout:
- *  post:
- *      tags:
- *          - Auth
- *      summary: 리프레시 토큰 비활성화 (logout)
- *      requestBody: 
- *          required: true
- *          content:
- *              application/json:
- *                  schema:
- *                      type: object
- *                      properties:
- *                          refreshToken:
- *                              type: string
- *                              description: 리프레시 토큰
- *      responses:
- *          204:
- *              description: 로그아웃 성공
- *          400:
- *              description: bad request
- * 
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: 로그아웃
+ *     description: Refresh Token을 비활성화하여 로그아웃 처리한다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh Token
+ *     responses:
+ *       200:
+ *         description: 로그아웃 성공
+ *       400:
+ *         description: BAD_REQUEST
+ *       401:
+ *         description: UNAUTHORIZED
+ *       429:
+ *         description: TOO_MANY_REQUESTS
+ *       500:
+ *         description: INTERNAL_SERVER_ERROR
+ */
+
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Google 소셜 로그인 (Firebase)
+ *     description: Firebase Auth를 이용한 Google 소셜 로그인
+ *     responses:
+ *       302:
+ *         description: Google 인증 페이지로 리다이렉트
+ *       401:
+ *         description: UNAUTHORIZED
+ *       500:
+ *         description: INTERNAL_SERVER_ERROR
+ *       503:
+ *         description: SERVICE_UNAVAILABLE
+ */
+
+/**
+ * @swagger
+ * /auth/naver:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Naver 소셜 로그인
+ *     description: Naver OAuth 로그인
+ *     responses:
+ *       302:
+ *         description: Naver 인증 페이지로 리다이렉트
+ *       401:
+ *         description: UNAUTHORIZED
+ *       500:
+ *         description: INTERNAL_SERVER_ERROR
  */
