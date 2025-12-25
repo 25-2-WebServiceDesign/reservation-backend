@@ -19,6 +19,29 @@ const responseForm = (data, meta = {}) => {
 };
 
 module.exports = {
+    UnitCreate: {
+        type: "object",
+        properties: {
+            name: {
+                type: 'string'
+            },
+            address: {
+                type: "string"
+            },
+            phone: {
+                type: "string"
+            },
+            category: {
+                type: "string"
+            },
+            homepageUrl: {
+                type: "string"
+            },
+            detail: {
+                type: "string"
+            }
+        }
+    },
     ReservationCreate: {
         type: 'object',
         properties: {

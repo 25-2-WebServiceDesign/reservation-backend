@@ -1,5 +1,34 @@
 
 module.exports = {
+    Unit: {
+        type: "object",
+        properties: {
+            id: {
+                type: "integer"
+            },
+            name: {
+                type: 'string'
+            },
+            address: {
+                type: "string"
+            },
+            phone: {
+                type: "string"
+            },
+            ownerId: {
+                type: "integer"
+            },
+            category: {
+                type: "string"
+            },
+            homepageUrl: {
+                type: "string"
+            },
+            detail: {
+                type: "string"
+            }
+        }
+    },
     ReservationPolicy: {
         type: 'object',
         properties: {

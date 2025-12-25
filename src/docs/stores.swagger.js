@@ -221,7 +221,7 @@
  *          content:
  *              application/json:
  *                  schema:
- *                      $ref: "#/components/schemas/UnitCreate"
+ *                      $ref: "#/components/schemas/Unit"
  *      responses:
  *          201:
  *              description: created 유닛 생성 성공!
