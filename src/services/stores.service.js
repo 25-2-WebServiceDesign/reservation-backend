@@ -11,9 +11,26 @@ exports.createStore = async (data) => {
   return storeRepo.create(data);
 };
 
-exports.getStores = async () => {
-  return storeRepo.findAll();
+exports.getStores = async (page, limit) => {
+  const offset = limit * (page - 1);
+
+  const { rows, count } = await storeRepo.findAndCountAll({
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]]
+  });
+
+  return {
+    data: rows,
+    pagination: {
+      page,
+      limit,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+    },
+  };
 };
+
 
 exports.getStoreById = async (storeId) => {
   const id = Number(storeId);
@@ -80,18 +97,29 @@ exports.getStoreReviews = async (storeId) => {
   return reviews;
 };
 
-exports.getMyStores = async (ownerId) => {
-  if (!ownerId) {
+exports.getMyStores = async (ownerId, page, limit) => {
+  if (!Number.isInteger(ownerId) || ownerId <= 0) {
     throw new AppError("BAD_REQUEST", 400, "ownerId is required");
   }
 
-  const stores = await Store.findAll({
+  const safePage = Math.max(page || 1, 1);
+  const safeLimit = Math.max(limit || 5, 1);
+  const offset = safeLimit * (safePage - 1);
+
+  const { rows, count } = await Store.findAndCountAll({
     where: { ownerId },
-    order: [["id", "DESC"]],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]]
   });
 
-  return stores;
+  return {
+    data: rows,
+    totalCount: count,
+    totalPage: Math.ceil(count / safeLimit),
+  };
 };
+
 
 exports.patchStore = async (storeId, data, user) => {
   const id = Number(storeId);

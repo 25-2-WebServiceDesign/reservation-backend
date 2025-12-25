@@ -21,6 +21,10 @@ async function update(id, data, options = {}) {
   return findById(id, options);
 }
 
+async function findAndCountAll(options = {}) {
+  return Store.findAndCountAll(options)
+}
+
 async function remove(id, options = {}) {
   return Store.destroy({ where: { id }, ...options });
 }
@@ -34,6 +38,7 @@ module.exports = {
   findById,
   findOne,
   findAll,
+  findAndCountAll,
   update,
   remove,
   restore,

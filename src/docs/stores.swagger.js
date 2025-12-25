@@ -33,6 +33,19 @@
  *          - Stores
  *      summary: (모든 사용자) 모든 가게 조회
  *      description: 사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용
+ *      parameters:
+ *          - in: query
+ *            name: path
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 1
+ *          - in: query
+ *            name: limit
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 5
  *      responses:
  *          200:
  *              description: ok 가게 조회 성공
@@ -46,6 +59,19 @@
  *          - Stores
  *      summary: 본인 가게들 조회
  *      description: OWNER 사용자가 본인의 가게들을 조회함
+ *      parameters:
+ *          - in: query
+ *            name: path
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 1
+ *          - in: query
+ *            name: limit
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 5
  *      security:
  *          - bearerAuth: []
  *      responses:

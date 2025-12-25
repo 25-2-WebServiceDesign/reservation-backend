@@ -1,20 +1,29 @@
 const storesService = require("../services/stores.service");
 const AppError = require("../responses/AppError");
+const ApiResponse = require("../responses/ApiResponse");
 
 exports.createStore = async (req, res, next) => {
   try {
     const payload = { ...req.body, ownerId: req.user.id };
     const store = await storesService.createStore(payload);
-    res.status(201).json(store);
+    res.status(201).json({store});
   } catch (err) {
     next(err);
   }
 };
 
 exports.getStores = async (req, res, next) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 5;
+
   try {
-    const stores = await storesService.getStores();
-    res.status(200).json(stores);
+    const {data, totalCount, totalPage} = await storesService.getStores(page, limit);
+    res.status(200).json(new ApiResponse({data}, {
+      page,
+      limit,
+      totalCount,
+      totalPage
+    }));
   } catch (err) {
     next(err);
   }
@@ -71,10 +80,22 @@ exports.getStoreReviews = async (req, res, next) => {
 };
 
 exports.getMyStores = async (req, res, next) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 5;
+  const ownerId = Number(req.user.id);
+
+  if (!Number.isInteger(ownerId) || ownerId <= 0) {
+    return next(new AppError("UNAUTHORIZED", 401, "authorization error"));
+  }
+
   try {
-    const ownerId = req.user.id;
-    const stores = await storesService.getMyStores(ownerId);
-    return res.status(200).json(stores);
+    const {data, totalCount, totalPage} = await storesService.getMyStores(ownerId, page, limit);
+    return res.status(200).json(new ApiResponse({data}, {
+      page,
+      limit,
+      totalCount,
+      totalPage
+    }));
   } catch (err) {
     next(err);
   }
