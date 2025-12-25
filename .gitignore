@@ -4,5 +4,6 @@
 *.env
 firebase_config.json
 
+.DS_Store
 
 memory

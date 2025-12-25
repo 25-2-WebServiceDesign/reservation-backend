@@ -13,6 +13,10 @@ const options = {
             {
                 url: "http://localhost:3000",
                 description: "Local test"
+            },
+            {
+                url: "http://54.180.83.86:3000",
+                description: "aws server"
             }
         ],
         components: {
