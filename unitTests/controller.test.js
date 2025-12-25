@@ -69,7 +69,7 @@ describe("stores.controller unit tests", () => {
   expect(res.status).toHaveBeenCalledWith(200);
 
   expect(res.json).toHaveBeenCalledWith({
-    data: { data: [{ id: 1 }] },
+    data: { stores: [{ id: 1 }] },
     meta: {
       page: 1,
       limit: 5,
