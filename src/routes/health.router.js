@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const healthController = require("../controllers/health.controller");
-
-router.get("/", healthController.healthCheck);
+router.get("/", async (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 module.exports = router;

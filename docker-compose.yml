@@ -1,20 +1,22 @@
-version: "3.8"
-
 services:
+  redis:
+    image: redis:7
+    container_name: reservation-redis
+    restart: unless-stopped
+
   app:
     build: .
     container_name: reservation-app
     ports:
-      - "${PORT:-3000}:3000"
+      - "3000:3000"
     env_file:
       - .env
+    environment:
+      # docker-compose 내부에서는 redis 컨테이너 이름으로 접근
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=
     depends_on:
       - redis
-    restart: unless-stopped
-
-  redis:
-    image: redis:7
-    container_name: reservation-redis
-    ports:
-      - "6379:6379"
     restart: unless-stopped
