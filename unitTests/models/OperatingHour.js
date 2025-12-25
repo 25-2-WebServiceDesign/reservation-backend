@@ -1,4 +1,4 @@
-const sequelize = require('../setup');
+const sequelize = require('../config/sequelize');
 const {DataTypes} = require("sequelize");
 
 const OperatingHour = sequelize.define("OperatingHour", {
@@ -24,7 +24,7 @@ const OperatingHour = sequelize.define("OperatingHour", {
         allowNull: false,
     },
 }, {
-    timestamps: true,
+    timestamps: false,
     paranoid: false,
 })
 
