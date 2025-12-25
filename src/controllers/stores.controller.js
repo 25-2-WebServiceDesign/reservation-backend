@@ -137,7 +137,7 @@ exports.createStoreUnit = async (req, res, next) => {
       req.body,
       req.user
     );
-    return res.status(201).json(unit);
+    return res.status(201).json(new ApiResponse({unit}));
   } catch (err) {
     next(err);
   }

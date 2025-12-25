@@ -23,23 +23,19 @@ module.exports = {
         type: "object",
         properties: {
             name: {
-                type: 'string'
-            },
-            address: {
                 type: "string"
             },
-            phone: {
+            description: {
                 type: "string"
             },
-            category: {
-                type: "string"
+            profileImage: {
+                type: "string",
+                default: null,
             },
-            homepageUrl: {
-                type: "string"
+            detailUrl: {
+                type: "string",
+                default: null
             },
-            detail: {
-                type: "string"
-            }
         }
     },
     ReservationCreate: {

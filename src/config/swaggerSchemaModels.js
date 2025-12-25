@@ -6,27 +6,21 @@ module.exports = {
             id: {
                 type: "integer"
             },
+            storeId: {
+                type: 'integer'
+            },
             name: {
-                type: 'string'
-            },
-            address: {
                 type: "string"
             },
-            phone: {
+            description: {
                 type: "string"
             },
-            ownerId: {
+            profileImage: {
                 type: "integer"
             },
-            category: {
+            detailUrl: {
                 type: "string"
             },
-            homepageUrl: {
-                type: "string"
-            },
-            detail: {
-                type: "string"
-            }
         }
     },
     ReservationPolicy: {
