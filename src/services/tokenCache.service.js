@@ -1,39 +1,49 @@
-const { getRedisClient } = require("../config/redis");
+const { redisClient, connectRedis } = require("../config/redis");
 
-/**
- * refresh token을 redis에도 저장해서
- * - refresh 요청 시 DB 조회 전에 redis로 1차 검증(빠름)
- * - logout/재로그인 시 redis에서 즉시 폐기 가능
- */
-function keyRefresh(userId, refreshToken) {
-  return `refresh:${userId}:${refreshToken}`;
+const RT_PREFIX = "rt:";
+
+function rtKey(userId) {
+  return `${RT_PREFIX}${userId}`;
 }
 
-async function storeRefreshToken(userId, refreshToken, ttlSec) {
-  const redis = getRedisClient();
-  if (redis.set.length >= 4) {
-    return redis.set(keyRefresh(userId, refreshToken), "1", "EX", ttlSec);
-  }
-  return redis.set(keyRefresh(userId, refreshToken), "1", ttlSec);
+async function storeRefreshToken(userId, refreshToken, ttlSeconds = 60 * 60 * 24 * 14) {
+  await connectRedis();
+  const key = rtKey(userId);
+  await redisClient.set(key, refreshToken, { EX: ttlSeconds });
+  return true;
 }
 
-async function existsRefreshToken(userId, refreshToken) {
-  const redis = getRedisClient();
-  if (typeof redis.exists === "function") {
-    const n = await redis.exists(keyRefresh(userId, refreshToken));
-    return Number(n) === 1;
-  }
-  const v = await redis.get(keyRefresh(userId, refreshToken));
-  return !!v;
+async function getRefreshToken(userId) {
+  await connectRedis();
+  return await redisClient.get(rtKey(userId));
 }
 
-async function revokeRefreshToken(userId, refreshToken) {
-  const redis = getRedisClient();
-  return redis.del(keyRefresh(userId, refreshToken));
+async function deleteRefreshToken(userId) {
+  await connectRedis();
+  return await redisClient.del(rtKey(userId));
+}
+
+async function setToken(key, value, ttlSeconds) {
+  await connectRedis();
+  if (ttlSeconds) return await redisClient.set(key, value, { EX: ttlSeconds });
+  return await redisClient.set(key, value);
+}
+
+async function getToken(key) {
+  await connectRedis();
+  return await redisClient.get(key);
+}
+
+async function deleteToken(key) {
+  await connectRedis();
+  return await redisClient.del(key);
 }
 
 module.exports = {
   storeRefreshToken,
-  existsRefreshToken,
-  revokeRefreshToken,
+  getRefreshToken,
+  deleteRefreshToken,
+  setToken,
+  getToken,
+  deleteToken,
 };

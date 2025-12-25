@@ -7,7 +7,7 @@ const expressUi = require("swagger-ui-express")
 // router 불러오기
 const healthRouter = require("./routes/health.router");
 const naverAuthRouter = require("./routes/authNaver.router");
-const firebaseAuthRouter = require("./routes/authFirebse.router");
+const firebaseAuthRouter = require("./routes/authFirebase.router");
 const authRouter = require("./routes/auth.router");
 
 const storesRouter = require("./routes/stores.router");

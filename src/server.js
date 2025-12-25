@@ -1,5 +1,18 @@
-const app = require("./app");
+require("dotenv").config();
 
-app.listen(3000, () => {
-    console.log("server listening on port 3000");
-})
+const app = require("./app");
+const { connectRedis } = require("./config/redis"); 
+
+const PORT = process.env.PORT || 3000;
+
+(async () => {
+  try {
+    await connectRedis(); 
+    app.listen(PORT, () => {
+      console.log(`server listening on port ${PORT}`);
+    });
+  } catch (e) {
+    console.error("[BOOT] failed to start server:", e?.message || e);
+    process.exit(1);
+  }
+})();
