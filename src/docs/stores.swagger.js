@@ -35,7 +35,7 @@
  *      description: 사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용
  *      parameters:
  *          - in: query
- *            name: path
+ *            name: page
  *            required: false
  *            schema:
  *                type: integer

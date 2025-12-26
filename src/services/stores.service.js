@@ -201,14 +201,15 @@ exports.getStoreUnits = async (storeId, { page = 1, limit = 20, order = "desc" }
 
   const offset = (p - 1) * l;
 
-  const {cols, totalCount} = await reservationUnitRepo.findAndCountAll({
+
+  const {rows, count} = await reservationUnitRepo.findAndCountAll({
     where: {storeId: id},
     limit,
     offset,
     order: [["createdAt", ord]],
   })
 
-  return {units: cols, totalCount, totalPage: Math.ceil(totalCount / limit)};
+  return {units: rows, totalCount: count, totalPage: Math.ceil(count / limit)};
 };
 
 exports.createStoreUnit = async (storeId, data, user) => {
