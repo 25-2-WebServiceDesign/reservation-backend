@@ -116,17 +116,24 @@ UnitClosedDay.belongsTo(ReservationUnit, {
     foreignKey: "unitId"
 })
 
-// Store - Reservation - User
-User.belongsToMany(Store, {
-    through: Reservation,
-    foreignKey: "userId",
-    otherKey: "storeId"
-})
-Store.belongsToMany(User, {
-    through: Reservation,
-    foreignKey: "storeId",
-    otherKey: "userId",
-})
+// User - Reservation
+User.hasMany(Reservation, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+Reservation.belongsTo(User, {
+  foreignKey: "userId",
+});
+
+// ReservationUnit - Reservation
+ReservationUnit.hasMany(Reservation, {
+  foreignKey: "unitId",
+  onDelete: "CASCADE",
+});
+Reservation.belongsTo(ReservationUnit, {
+  foreignKey: "unitId",
+});
+
 
 // Reservation - Review
 Reservation.hasOne(Review, {
@@ -146,6 +153,13 @@ Review.belongsTo(User, {
     foreignKey: "userId",
 });
 
+// Reservation ↔ ReservationUnit
+Reservation.belongsTo(ReservationUnit, {
+  foreignKey: "unitId",
+});
+ReservationUnit.hasMany(Reservation, {
+  foreignKey: "unitId",
+});
 
 // sequelize.sync({force: true});
 

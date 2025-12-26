@@ -1,14 +1,28 @@
 const { Op } = require("sequelize");
-const { Store } = require("../models");
+const { Store, sequelize } = require("../models");
 const { storeRepo, reservationRepo, reservationUnitRepo, reviewRepo, favoriteRepo } = require("../repositories")
 
 const AppError = require("../responses/AppError");
+
+function storeSaftyWrapper(store) {
+  return {
+    id: store.id,
+    name: store.name,
+    address: store.address,
+    phone: store.phone,
+    category: store.category,
+    homepageUrl: store.homepageUrl,
+    detail: store.detail,
+    ownerId: store.ownerId
+  }
+}
 
 exports.createStore = async (data) => {
   if (!data.name) {
     throw new AppError("VALIDATION_ERROR", 400, "Store name is required");
   }
-  return storeRepo.create(data);
+  const newStore = await storeRepo.create(data);
+  return storeSaftyWrapper(newStore);
 };
 
 exports.getStores = async (page, limit) => {
@@ -21,13 +35,9 @@ exports.getStores = async (page, limit) => {
   });
 
   return {
-    data: rows,
-    pagination: {
-      page,
-      limit,
-      totalCount: count,
-      totalPages: Math.ceil(count / limit),
-    },
+    data: rows.map(r => storeSaftyWrapper(r)),
+    totalCount: count,
+    totalPage: Math.ceil(count / limit),
   };
 };
 
@@ -43,7 +53,7 @@ exports.getStoreById = async (storeId) => {
     throw new AppError("NOT_FOUND", 404, "store not found");
   }
 
-  return store;
+  return storeSaftyWrapper(store);
 };
 
 /*
@@ -114,7 +124,7 @@ exports.getMyStores = async (ownerId, page, limit) => {
   });
 
   return {
-    data: rows,
+    data: rows.map(r => storeSaftyWrapper(r)),
     totalCount: count,
     totalPage: Math.ceil(count / safeLimit),
   };
@@ -149,6 +159,17 @@ exports.patchStore = async (storeId, data, user) => {
     throw new AppError("VALIDATION_ERROR", 400, "No valid fields to update");
   }
 
+  const transaction = await sequelize.transaction();
+
+  try {
+    const updatedStore = storeRepo.update(id, patch, {transaction});
+    await transaction.commit()
+    return updatedStore
+  } catch(err){
+    await transaction.rollback()
+    throw(err)
+  }
+
   return storeRepo.update(id, patch);
 };
 
@@ -180,16 +201,14 @@ exports.getStoreUnits = async (storeId, { page = 1, limit = 20, order = "desc" }
 
   const offset = (p - 1) * l;
 
-  const units = await reservationUnitRepo.findAll(
-    { storeId: id },
-    {
-      limit: l,
-      offset,
-      order: [["id", ord.toUpperCase()]],
-    }
-  );
+  const {cols, totalCount} = await reservationUnitRepo.findAndCountAll({
+    where: {storeId: id},
+    limit,
+    offset,
+    order: [["createdAt", ord]],
+  })
 
-  return units;
+  return {units: cols, totalCount, totalPage: Math.ceil(totalCount / limit)};
 };
 
 exports.createStoreUnit = async (storeId, data, user) => {

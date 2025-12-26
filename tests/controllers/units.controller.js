@@ -5,19 +5,23 @@ const unitsService = require("../services/units.service");
 
 
 function isValidDateYYYYMMDD(dateStr) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  if (typeof dateStr !== "string") return false;
 
-  const d = new Date(`${dateStr}T00:00:00+09:00`);
-  if (Number.isNaN(d.getTime())) return false;
+  const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return false;
 
-  const [y, m, day] = dateStr.split("-").map(Number);
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
 
-  return (
-    d.getFullYear() === y &&
-    d.getMonth() + 1 === m &&
-    d.getDate() === day
-  );
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+
+  // 월별 일 수 체크 (윤년 포함)
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return day <= daysInMonth;
 }
+
 
 
 exports.getAvailability = async (req, res, next) => {
@@ -25,12 +29,12 @@ exports.getAvailability = async (req, res, next) => {
   const unitId = Number(req.params.id);
   const { date } = req.query;
 
-  if (!Number.isInteger(unitId) || unitId < 0) {
-    return next(new AppError("BAD_REQUEST", 400, "positive integer unitId is required"));
+  if (!Number.isInteger(unitId) || unitId <= 0) {
+    return next(new CustomError("BAD_REQUEST", "positive integer unitId is required", 400));
   }
 
   if (!isValidDateYYYYMMDD(date)) {
-    return next(new AppError("BAD_REQUEST", 400, "Invalid date (YYYY-MM-dd)"));
+    return next(new CustomError("BAD_REQUEST", "Invalid date (YYYY-MM-dd)", 400));
   }
 
   // process
@@ -42,22 +46,6 @@ exports.getAvailability = async (req, res, next) => {
   }
 };
 
-// exports.getUnitReviews = async (req, res, next) => {
-//   const unitId = Number(req.params.id);
-
-//   if (!Number.isInteger(unitId) || unitId <= 0) {
-//     return next(new AppError("BAD_REQUEST", 400, "unitId is required"));
-//   }
-
-//   try {
-//     const reviews = await unitsService.getUnitReviews(unitId);
-//     return res.status(200).json(ApiRsponse(reviews, { itemCount: reviews.length}));
-//   } catch (err) {
-//     return next(err);
-//   }
-// };
-
-// ----
 
 exports.getDetail = async (req, res, next) => {
   // input validation
@@ -127,7 +115,7 @@ exports.delete = async (req, res, next) => {
 
   try {
     const data = await unitsService.delete(unitId, userId);
-    res.status(200).json(data);
+    res.status(200).json(new ApiResponse(data));
   } catch(err) {
     next(err);
   }
@@ -235,7 +223,13 @@ exports.getReviews = async (req, res, next) => {
       totalCount,
       totalPage
     } = await unitsService.getReviews(unitId, page, limit);
-    return res.status(200).json(new ApiResponse(data, {
+    return res.status(200).json(new ApiResponse({reviews: data.map(r => {return {
+      id: r.id,
+      reservationId: r.reservationId,
+      userId: r.userId,
+      content: r.content,
+      rating: r.rating,
+    }})}, {
       page,
       limit,
       totalCount,

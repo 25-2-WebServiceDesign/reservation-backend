@@ -163,7 +163,6 @@ exports.getFavorites = async (userId, { page = 1, limit = 10, order = "desc" } =
       phone: fav.Store.phone,
       homepageUrl: fav.Store.homepageUrl,
       detail: fav.Store.detail,
-      createdAt: fav.Store.createdAt,
     })),
     totalCount: count,
     totalPage: Math.ceil(count / l),

@@ -17,15 +17,13 @@ function conflict(msg) {
   return new CustomError("CONFLICT", msg, 409);
 }
 
-function reviewSafetyWrapper(r) {
+function reviewSaftyWrapper(r) {
   return {
     id: r.id,
     reservationId: r.reservationId,
     userId: r.userId,
     content: r.content,
     rating: r.rating,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
   };
 }
 
@@ -54,7 +52,7 @@ exports.updateMyReview = async (userId, reviewId, { rating, content }) => {
   try {  
     const updatedReivew = await reviewRepo.update(reviewId, data, {transaction});
     await transaction.commit();
-    return updatedReivew;
+    return reviewSaftyWrapper(updatedReivew);
   } catch(err) {
     await transaction.rollback();
     throw err;
@@ -89,5 +87,6 @@ exports.createReviewForReservation = async (userId, reservationId, { rating, con
   const exists = await reviewRepo.findOne({ reservationId });
   if (exists) throw conflict("Review already exists for this reservation");
 
-  return reviewRepo.create({ userId, reservationId, rating, content });
+  const review = await reviewRepo.create({ userId, reservationId, rating, content });
+  return reviewSaftyWrapper(review);
 };

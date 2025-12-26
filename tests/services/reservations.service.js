@@ -1,5 +1,5 @@
 const CustomError = require("../responses/customError");
-const { Reservation } = require("../models");
+const { Reservation, ReservationUnit, Store } = require("../models");
 
 function reservationSafetyWrapper(r) {
   return {
@@ -11,8 +11,6 @@ function reservationSafetyWrapper(r) {
     memo: r.memo,
     headcount: r.headcount,
     status: r.status,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
   };
 }
 
@@ -108,6 +106,45 @@ exports.updateReservationStatus = async (userId, reservationId, nextStatus) => {
 
   return reservationSafetyWrapper(reservation);
 };
+
+// owner 전용 상태 변경 함수
+exports.updateReservationStatusByOwner = async(userId, reservationId, nextStatus) => {
+  const status = String(nextStatus).toUpperCase();
+
+  const reservation = await Reservation.findOne({
+    where: {id: reservationId},
+    include: [
+      {
+        model: ReservationUnit,
+        include: [
+          {
+            model: Store
+          }
+        ]
+      }
+    ]
+  })
+
+  if (!reservation) {
+    throw new CustomError("NOT_FOUND", "Reservation not found", 404);
+  }
+
+  const ownerId = reservation.ReservationUnit.Store.ownerId;
+
+  if (Number(ownerId) !== Number(userId)) {
+    throw new CustomError("NOT_FOUND", "Reservation not found", 404);
+  }
+
+  const current = reservation.status;
+
+  if (current === status) {
+    return reservationSafetyWrapper(reservation)
+  }
+  reservation.status = status;
+  await reservation.save();
+
+  return reservationSafetyWrapper(reservation);
+}
 
 exports.updateReservation = async (userId, reservationId, { memo, headcount }) => {
   const reservation = await Reservation.findOne({
