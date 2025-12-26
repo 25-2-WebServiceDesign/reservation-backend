@@ -223,7 +223,13 @@ exports.getReviews = async (req, res, next) => {
       totalCount,
       totalPage
     } = await unitsService.getReviews(unitId, page, limit);
-    return res.status(200).json(new ApiResponse(data, {
+    return res.status(200).json(new ApiResponse({reviews: data.map(r => {return {
+      id: r.id,
+      reservationId: r.reservationId,
+      userId: r.userId,
+      content: r.content,
+      rating: r.rating,
+    }})}, {
       page,
       limit,
       totalCount,
