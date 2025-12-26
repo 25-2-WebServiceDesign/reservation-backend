@@ -33,7 +33,7 @@ exports.getStores = async (req, res, next) => {
 exports.getStoreById = async (req, res, next) => {
   try {
     const store = await storesService.getStoreById(req.params.storeId);
-    res.status(200).json(store);
+    res.status(200).json(new ApiResponse({store}));
   } catch (err) {
     next(err);
   }
@@ -59,8 +59,8 @@ exports.getStoreReviews = async (req, res, next) => {
   const order = String(req.query.order ?? "desc").toLowerCase(); // asc/desc
 
   try {
-    const reviews = await storesService.getStoreReviews(storeId, { page, limit, order });
-    return res.status(200).json(reviews);
+    const {reviews, totalCount, totalPage} = await storesService.getStoreReviews(storeId, { page, limit, order });
+    return res.status(200).json(new ApiResponse({reviews}, {page, limit, totalCount, totalPage}));
   } catch (err) {
     return next(err);
   }

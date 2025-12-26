@@ -303,16 +303,18 @@ exports.getStoreReviews = async (storeId, { page = 1, limit = 10, order = "desc"
 
   const offset = (page - 1) * limit;
 
-  const reviews = await reviewRepo.findAll(
-    { reservationId: { [Op.in]: reservationIds } },
-    {
-      limit,
-      offset,
-      order: [["id", order.toUpperCase()]],
-    }
-  );
+  const {rows, count} = await reviewRepo.findAndCountAll({
+    where: {reservationId: { [Op.in]: reservationIds }},
+    limit,
+    offset,
+    order: [["id", order.toUpperCase()]]
+  })
 
-  return reviews;
+  return {
+    reviews: rows, 
+    totalCount: count,
+    totalPage: Math.ceil(count / limit)
+  };
 };
 
 // favorite 가게 추가 (멱등)
