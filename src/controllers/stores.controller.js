@@ -39,20 +39,6 @@ exports.getStoreById = async (req, res, next) => {
   }
 };
 
-/*
-exports.updateStore = async (req, res, next) => {
-  try {
-    const store = await storesService.updateStore(
-      req.params.storeId,
-      req.body
-    );
-    res.status(200).json(store);
-  } catch (err) {
-    next(err);
-  }
-};
-*/
-
 exports.deleteStore = async (req, res, next) => {
   try {
     await storesService.deleteStore(req.params.storeId, req.user);
@@ -184,7 +170,7 @@ exports.addFavorite = async (req, res, next) => {
 
   try {
     const favorite = await storesService.addFavorite(req.user.id, storeId);
-    return res.status(200).json(favorite);
+    return res.status(200).json(new ApiResponse({favorite}));
   } catch (err) {
     return next(err);
   }
