@@ -41,6 +41,10 @@ async function assertReservable({
   headcount = 1,
   transaction = null,
 }) {
+  const kstDate = new Date(
+    startTime.toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+  );
+
   // 1. unit
   const unit = await reservationUnitRepo.findById(unitId, { transaction });
   if (!unit) {
@@ -69,7 +73,8 @@ async function assertReservable({
 
   // 3. 요일
   const dayOfWeekMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-  const dayOfWeek = dayOfWeekMap[startTime.getDay()];
+  const dayOfWeek = dayOfWeekMap[kstDate.getDay()];
+
 
   // 4. 운영시간
   const operatingHour = await operatingHourRepo.findOne(
@@ -86,7 +91,7 @@ async function assertReservable({
 
   // 5. 시간 범위 계산
   const startMinutes =
-    startTime.getHours() * 60 + startTime.getMinutes();
+    kstDate.getHours() * 60 + kstDate.getMinutes();
   const endMinutes = startMinutes + slotDuration;
 
   const openMinutes = toMinutes(operatingHour.openTime);
@@ -101,7 +106,7 @@ async function assertReservable({
   }
 
   // 6. 같은 시간대 예약 충돌 확인
-  const endTime = new Date(startTime);
+  const endTime = new Date(kstDate);
   endTime.setMinutes(endTime.getMinutes() + slotDuration);
 
   const overlapped = await reservationRepo.findOne(
@@ -109,7 +114,7 @@ async function assertReservable({
       unitId,
       status: { [Op.in]: ["PENDING", "CONFIRMED"] },
       startTime: { [Op.lt]: endTime },
-      endTime: { [Op.gt]: startTime },
+      endTime: { [Op.gt]: kstDate },
     },
     { transaction }
   );

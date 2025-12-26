@@ -17,7 +17,7 @@ exports.getMyReservations = async (req, res, next) => {
       await reservationsService.getMyReservations(req.user.id, { page, limit, order });
 
     return res.status(200).json(
-      new ApiResponse(data, {
+      new ApiResponse({reservations: data}, {
         page,
         limit,
         totalCount,
@@ -41,7 +41,7 @@ exports.getReservationById = async (req, res, next) => {
       reservationId
     );
 
-    return res.status(200).json(new ApiResponse(reservation));
+    return res.status(200).json(new ApiResponse({reservation}));
   } catch (err) {
     return next(err);
   }
@@ -59,13 +59,24 @@ exports.updateReservationStatus = async (req, res, next) => {
   }
 
   try {
-    const updated = await reservationsService.updateReservationStatus(
-      req.user.id,
-      reservationId,
-      status
-    );
+    let updated;
+    if (req.user.role === "CUSTOMER") {
+      updated = await reservationsService.updateReservationStatus(
+        req.user.id,
+        reservationId,
+        status
+      );
+    } else if (req.user.role === "OWNER") {
+      console.log("owner")
+      updated = await reservationsService.updateReservationStatusByOwner(
+        req.user.id,
+        reservationId,
+        status
+      );
+    }
+    
 
-    return res.status(200).json(new ApiResponse(updated));
+    return res.status(200).json(new ApiResponse({reservation: updated}));
   } catch (err) {
     return next(err);
   }
@@ -91,7 +102,7 @@ exports.updateReservation = async (req, res, next) => {
       { memo, headcount }
     );
 
-    return res.status(200).json(new ApiResponse(updated));
+    return res.status(200).json(new ApiResponse({reservation: updated}));
   } catch (err) {
     return next(err);
   }
