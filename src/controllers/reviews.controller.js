@@ -55,31 +55,30 @@ exports.deleteMyReview = async (req, res, next) => {
 };
 
 exports.createReviewForReservation = async (req, res, next) => {
+  const userId = req.user?.id;
+  if (!userId) return next(new CustomError("UNAUTHORIZED", "login required", 401));
+
+  const reservationId = Number(req.params.id);
+  if (!Number.isInteger(reservationId) || reservationId <= 0) {
+    return next(new CustomError("BAD_REQUEST", "reservationId is invalid", 400));
+  }
+
+  const content = String(req.body?.content ?? "").trim();
+  const rating = Number(req.body?.rating);
+
+  if (!content) {
+    return next(new CustomError("BAD_REQUEST", "content is required", 400));
+  }
+  if (!Number.isInteger(rating) || rating < 0 || rating > 10) {
+    return next(new CustomError("BAD_REQUEST", "rating must be 0~10", 400));
+  }
   try {
-    const userId = req.user?.id;
-    if (!userId) return next(new CustomError("UNAUTHORIZED", "login required", 401));
-
-    const reservationId = Number(req.params.id);
-    if (!Number.isInteger(reservationId) || reservationId <= 0) {
-      return next(new CustomError("BAD_REQUEST", "reservationId is invalid", 400));
-    }
-
-    const content = String(req.body?.content ?? "").trim();
-    const rating = Number(req.body?.rating);
-
-    if (!content) {
-      return next(new CustomError("BAD_REQUEST", "content is required", 400));
-    }
-    if (!Number.isInteger(rating) || rating < 0 || rating > 10) {
-      return next(new CustomError("BAD_REQUEST", "rating must be 0~10", 400));
-    }
-
     const created = await reviewsService.createReviewForReservation(userId, reservationId, {
       rating,
       content,
     });
 
-    return res.status(201).json(new ApiResponse(created));
+    return res.status(201).json(new ApiResponse({review: created}));
   } catch (err) {
     return next(err);
   }
