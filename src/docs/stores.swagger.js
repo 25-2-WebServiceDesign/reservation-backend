@@ -178,7 +178,7 @@
  *      tags:
  *          - Stores
  *      summary: 가게 리뷰들 조회
- *      description: 가게의 리뷰들을 조회한다. (모든 사용자) - 추후 페이지네이션 적용 예정
+ *      description: 가게의 리뷰들을 조회한다. (모든 사용자) 
  *      parameters:
  *          - in: path
  *            name: id
@@ -189,7 +189,7 @@
  *            default: 1
  *      responses:
  *          200:
- *              description: ok 가게 예약들 조회 성공
+ *              description: ok 가게 리뷰 조회 성공
  *          404:
  *              description: not_found 해당 ID 를 가진 가게가 없습니다.
  */
