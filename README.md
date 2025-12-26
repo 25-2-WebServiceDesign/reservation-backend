@@ -33,3 +33,15 @@ Reservation Service는 식당·숙소·스토어 등 다양한 업종에서 사�
 npm test
 ```
 
+
+## 서비스 접속 정보
+
+- **Base URL**
+  - http://54.180.83.86:3000
+
+- **Health Check**
+  - GET /health
+  - http://54.180.83.86:3000/health
+
+- **Swagger API Docs**
+  - http://54.180.83.86:3000/api-docs
