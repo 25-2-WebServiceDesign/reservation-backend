@@ -1,7 +1,7 @@
 const storesService = require("../services/stores.service");
 const AppError = require("../responses/AppError");
 const ApiResponse = require("../responses/ApiResponse");
-const reservationsService = require("../services/reservations.service");
+// const reservationsService = require("../services/reservations.service");
 
 exports.createStore = async (req, res, next) => {
   try {
@@ -138,29 +138,37 @@ exports.getStoreReservations = async (req, res, next) => {
     const limit = Number(req.query.limit) || 10;
     const order = req.query.order || "desc";
 
-    const result = await reservationsService.getMyReservations(storeId, { page, limit, order });
-
-    const reservations = result.reservations ?? result.data ?? result.rows ?? [];
-
-    const totalCount = result.totalCount ?? result.count ?? result.meta?.totalCount ?? 0;
-    const totalPage =
-      result.totalPage ??
-      result.meta?.totalPage ??
-      Math.ceil((totalCount || 0) / limit);
-
-    const sanitized = reservations.map((r) => {
-      const obj = r?.toJSON ? r.toJSON() : r;
-      const { storeId, ...rest } = obj;
-      return rest;
+    const {
+      data: reservations,
+      totalCount,
+      totalPage,
+    } = await storesService.getStoreReservations(storeId, {
+      page,
+      limit,
+      order,
     });
 
-    return res
-      .status(200)
-      .json(new ApiResponse({ reservations: sanitized }, { page, limit, totalCount, totalPage }));
+    const sanitized = reservations.map(r => {
+      const obj = r.toJSON ? r.toJSON() : r;
+      return obj; // storeId 제거할 필요 없으면 그대로
+    });
+
+    return res.status(200).json(
+      new ApiResponse(
+        { reservations: sanitized },
+        {
+          page,
+          limit,
+          totalCount,
+          totalPage,
+        }
+      )
+    );
   } catch (err) {
     return next(err);
   }
 };
+
 
 exports.addFavorite = async (req, res, next) => {
   const storeId = Number(req.params.id);

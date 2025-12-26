@@ -16,6 +16,10 @@ async function findAll(where = {}, options = {}) {
   return Reservation.findAll({ where, ...options });
 }
 
+async function findAndCountAll(options = {}) {
+  return Reservation.findAndCountAll(options)
+}
+
 async function update(id, data, options = {}) {
   await Reservation.update(data, { where: { id }, ...options });
   return findById(id, options);
@@ -30,6 +34,7 @@ module.exports = {
   findById,
   findOne,
   findAll,
+  findAndCountAll,
   update,
   remove,
 };

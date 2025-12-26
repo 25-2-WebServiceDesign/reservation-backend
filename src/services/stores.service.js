@@ -259,19 +259,22 @@ exports.getStoreReservations = async (storeId, { page = 1, limit = 10, order = "
   if (!units || units.length === 0) return [];
 
   const unitIds = units.map(u => u.id);
-
   const offset = (page - 1) * limit;
 
-  const reservations = await reservationRepo.findAll(
-    { unitId: { [Op.in]: unitIds } },
-    {
-      limit,
-      offset,
-      order: [["id", order.toUpperCase()]],
-    }
-  );
+  const {rows, count} = await reservationRepo.findAndCountAll({
+    where: {
+      unitId: { [Op.in]: unitIds },
+    },
+    limit,
+    offset,
+    order: [['id', order.toUpperCase()]]
+  })
 
-  return reservations;
+  return {
+    data: rows,
+    totalCount: count,
+    totalPage: Math.ceil(count/limit)
+  };
 };
 
 exports.getStoreReviews = async (storeId, { page = 1, limit = 10, order = "desc" } = {}) => {

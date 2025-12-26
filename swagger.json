@@ -1,0 +1,2095 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Reservation Service API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local test"
+    },
+    {
+      "url": "http://54.180.83.86:3000",
+      "description": "aws server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UnitCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "profileImage": {
+            "type": "string",
+            "default": null
+          },
+          "detailUrl": {
+            "type": "string",
+            "default": null
+          }
+        }
+      },
+      "ReservationCreate": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string",
+            "default": "2025-08-01T14:00:00+00:00"
+          },
+          "headcount": {
+            "type": "integer",
+            "default": 1
+          },
+          "memo": {
+            "type": "string"
+          }
+        }
+      },
+      "BusinessHour": {
+        "$ref": "#/components/schemas/ReservationPolicy"
+      },
+      "UnitsUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "store name"
+          },
+          "description": {
+            "type": "string",
+            "default": "store description"
+          },
+          "profileImage": {
+            "type": "string",
+            "default": null
+          },
+          "detailUrl": {
+            "type": "string",
+            "default": null
+          }
+        }
+      },
+      "StoreCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "잘나가는 식당"
+          },
+          "address": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "default": "+821012341234"
+          },
+          "category": {
+            "type": "string",
+            "default": "resturant"
+          },
+          "homepageUrl": {
+            "type": "string",
+            "default": null
+          },
+          "detail": {
+            "type": "string",
+            "default": " "
+          }
+        }
+      },
+      "GetAllReviews": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "reviews": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "응답 시간 iso format",
+                "example": "2025-12-22T17:50:48.212Z"
+              }
+            }
+          }
+        }
+      },
+      "GetOneReview": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "review": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "응답 시간 iso format",
+                "example": "2025-12-22T17:50:48.212Z"
+              }
+            }
+          }
+        }
+      },
+      "GetOneUser": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "응답 시간 iso format",
+                "example": "2025-12-22T17:50:48.212Z"
+              }
+            }
+          }
+        }
+      },
+      "StandardError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "BAD_REQUEST"
+          },
+          "message": {
+            "type": "string",
+            "example": "userId is required"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              },
+              "accessToken": {
+                "type": "string",
+                "description": "JWT 인증 토큰"
+              },
+              "refreshToken": {
+                "type": "string",
+                "description": "JWT 리프레시 토큰"
+              },
+              "expiresIn": {
+                "type": "integer",
+                "description": "accessToken 유효 기간 (단위: 초)",
+                "example": 3600
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "응답 시간 iso format",
+                "example": "2025-12-22T17:50:48.212Z"
+              }
+            }
+          }
+        }
+      },
+      "Unit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "storeId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "profileImage": {
+            "type": "integer"
+          },
+          "detailUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationPolicy": {
+        "type": "object",
+        "properties": {
+          "slotDuration": {
+            "type": "integer",
+            "default": 30
+          },
+          "maximumHeadcount": {
+            "type": "integer",
+            "default": 1
+          },
+          "operatingHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperatingHour"
+            }
+          }
+        }
+      },
+      "OperatingHour": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MON",
+              "TUE",
+              "WED",
+              "THU",
+              "FRI",
+              "SAT",
+              "SUN"
+            ],
+            "default": "MON"
+          },
+          "openTime": {
+            "type": "string",
+            "default": "09:00"
+          },
+          "closeTime": {
+            "type": "string",
+            "default": "18:00"
+          }
+        }
+      },
+      "ReservationUnit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "storeId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "detailUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "Store": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "integer"
+          },
+          "category": {
+            "type": "string"
+          },
+          "homepageUrl": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nickname": {
+            "type": "string",
+            "example": "최현우"
+          },
+          "email": {
+            "type": "string",
+            "example": "example@gmail.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+820112341234"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CUSTOMER",
+              "OWNER",
+              "ADMIN"
+            ],
+            "example": "CUSTOMER"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "reservationId": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer",
+            "description": "0 ~ 10 사이의 별점"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/naver/login": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "naver login - swagger, postman 테스트 X (브라우저에서 테스트!)",
+        "description": "네이버 로그인",
+        "responses": {
+          "200": {
+            "description": "네이버 로그인 성공 (계정이 없다면 회원가입 후 생성)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "네이버 로그인 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/naver/callback": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "naver login callback - 직접 사용 X (네이버 인증에서 사용)",
+        "description": "네이버 로그인"
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "JWT 토큰 재발급",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "리프레시 토큰"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "재발금 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/firebase/google": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "firebase google 로그인을 위한 링크 (웹 브라우저에서 실행)",
+        "description": "post /auth/firebase/login body 에 idToken 을 담아서 로그인 요청 결과를 브라우저에 출력"
+      }
+    },
+    "/auth/firebase/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "firebase 로그인 API",
+        "description": "firebase 의 idToken 을 body 에서 받아서 로그인 처리",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "idToken": {
+                    "type": "string"
+                  },
+                  "description": "firebase idToken"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "리프레시 토큰 비활성화 (logout)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "리프레시 토큰"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "로그아웃 성공"
+          },
+          "400": {
+            "description": "bad request"
+          }
+        }
+      }
+    },
+    "/reservations": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "나의 예약 현황 조회",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내 예약 목록을 조회한다.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/reservations/{id}": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "예약 상세 조회",
+        "description": "예약 단건 상세 정보를 조회한다.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "reservation id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "404": {
+            "description": "예약이 없거나 접근 권한이 없는 경우"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "예약 수정/취소",
+        "description": "예약 정보를 수정.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "reservation id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "headcount": {
+                    "type": "integer"
+                  },
+                  "memo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "수정/취소 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "404": {
+            "description": "예약이 없거나 접근 권한이 없는 경우"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/reservations/{id}/status": {
+      "patch": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "예약 상태 변경",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "예약 상태를 변경한다. (owner 권한 등 정책에 따라 제한)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "reservation id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "변경할 예약 상태"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "예약을 찾을 수 없음"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/reservations/{id}/review": {
+      "post": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "리뷰 추가",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "예약이 완료 상태인 경우에만 리뷰를 작성한다. (리뷰의 사용자만 작성 가능)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "reservation id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "integer",
+                    "description": "별점"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "리뷰 내용"
+                  }
+                },
+                "required": [
+                  "rating",
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "리뷰 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청(예약 미완료 등)"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "404": {
+            "description": "예약을 찾을 수 없음"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "리뷰 확인",
+        "description": "리뷰 하나를 상세 확인",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "review id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "리뷰 불러오기 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneReview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 오류"
+          },
+          "404": {
+            "description": "리뷰 찾을 수 없음"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "리뷰 수정",
+        "description": "내가 작성한 리뷰를 수정한다.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "review id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "integer"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneReview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "리뷰를 찾을 수 없음"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "리뷰 삭제 (Soft Delete)",
+        "description": "리뷰를 소프트 딜리트 처리한다.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "review id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "삭제 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "리뷰를 찾을 수 없음"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/stores": {
+      "post": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 등록",
+        "description": "가게를 등록한다. OWNER 사용자 등급 필요",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoreCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created 가게 생성 성공"
+          },
+          "400": {
+            "description": "bad_request 유효하지 않은 카테고리 혹은 필수 항목 누락"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "(모든 사용자) 모든 가게 조회",
+        "description": "사용자가 모든 가게를 조회함 - 추후 페이지네이션 적용",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 조회 성공"
+          }
+        }
+      }
+    },
+    "/stores/me": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "본인 가게들 조회",
+        "description": "OWNER 사용자가 본인의 가게들을 조회함",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 5
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 조회 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          }
+        }
+      }
+    },
+    "/stores/{id}": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 상세 조회",
+        "description": "가게 상세 조회",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 상세 조회 성공"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게정보 업데이트",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "가게 정보 업데이트 (OWNER & 소유자 이상 등급 필요)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoreCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok 가게 정보 업데이트 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 삭제 (소프트)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "가게 소프트 딜리트 (OWNER & 소유자 혹은 그 이상의 등급)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 삭제 성공 (삭제된 ID, timestamp json형식으로 반환)"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      }
+    },
+    "/stores/{id}/units": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 유닛들 조회",
+        "description": "가게 유닛들 조회",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 상세 조회 성공"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "예약 유닛 추가",
+        "description": "예약을 할 수 있는 유닛 추가",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created 유닛 생성 성공!"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      }
+    },
+    "/stores/{id}/reservations": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 예약 조회",
+        "description": "가게의 예약을 조회한다. (OWNER & 소유자)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 예약들 조회 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      }
+    },
+    "/stores/{id}/reviews": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "가게 리뷰들 조회",
+        "description": "가게의 리뷰들을 조회한다. (모든 사용자) - 추후 페이지네이션 적용 예정",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 가게 예약들 조회 성공"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      }
+    },
+    "/stores/{id}/favorites": {
+      "post": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "관심 가게 추가",
+        "description": "관심 가게로 추가한다. (모든 사용자)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 관심 가게 추가 성공!"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없습니다."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "관심 가게 삭제 (소프트)",
+        "description": "괌심 가게 소프트 삭제",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "가게 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "no_content 삭제 성공 혹은 이미 삭제되거나 관심 가게에 존재하지 않음"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 가게가 없다."
+          }
+        }
+      }
+    },
+    "/units/{id}": {
+      "patch": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 상세 정보 수정",
+        "description": "유닛 상세 정보 수정 (owner)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok 유닛 상세 정보 업데이트 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 삭제 (소프트)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "유닛 소프트 딜리트 (가게 소유자 혹은 그 이상의 사용자)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "no_content 삭제 성공 혹은 이미 없음"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 상세 정보 확인",
+        "description": "유닛 상세 정보 확인 (모든 사용자)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 유닛 상세 정보 확인 성공"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없습니다."
+          }
+        }
+      }
+    },
+    "/units/{id}/business-hours": {
+      "post": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 운영시간 등록",
+        "description": "유닛 운영시간 등록",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessHour"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok 유닛 운영시간 등록 완료"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 운영시간 재설정 (업데이트)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "유닛 운영시간을 재설정한다. (처음부터 다시 등록)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessHour"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok 유닛 운영시간 재등록 완료"
+          },
+          "400": {
+            "description": "bad_request 필수 항목 누락 (businessHourUnits)"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      }
+    },
+    "/units/{id}/availability": {
+      "get": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛 예약 가능 시간 조회",
+        "description": "특정 날짜(date)에 대해 해당 유닛의 예약 가능한 time slot 리스트를 반환",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "schema": {
+              "type": "string"
+            },
+            "description": "조회할 날짜 'YYYY-MM-DD', 기본값 = 당일 날짜",
+            "default": "2025-12-11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 유닉 예약 가능 여부 조회 성공. (body 에 가능여부 반환)"
+          },
+          "400": {
+            "description": "bad_request 필수 항목 누락 (businessHourUnits)"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      }
+    },
+    "/units/{id}/reservations": {
+      "post": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "예약 생성",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "유닛에 대한 예약 생성 (사용자등급)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created 예약 생성 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "403": {
+            "description": "forbidden 유효하지 않은 사용자 (가게 주인, 관리자)"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      }
+    },
+    "/units/{id}/reviews": {
+      "get": {
+        "tags": [
+          "Units"
+        ],
+        "summary": "유닛의 리뷰들 조회",
+        "description": "유닛의 리뷰들 조회. (모든 사용자) - 페이지네이션 추가 예정",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "유닛 ID",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "default": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok 유닛 리뷰들 조회 성공"
+          },
+          "401": {
+            "description": "unauthorized 인증되지 않은 사용자"
+          },
+          "404": {
+            "description": "not_found 해당 ID 를 가진 유닛이 없다."
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "프로필 정보 확인",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내 프로필 정보를 조회한다.",
+        "responses": {
+          "200": {
+            "description": "조회 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "프로필 정보 수정",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내 프로필 정보를 수정한다.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "수정할 필드만 전달 (예 - nickname 등)",
+                "properties": {
+                  "nickname": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "default": "+821012341234"
+                  },
+                  "profileImage": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "프로필 삭제 (Soft Delete)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내 계정을 소프트 딜리트 처리한다.",
+        "responses": {
+          "204": {
+            "description": "삭제 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/users/me/reviews": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "내 리뷰 확인",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내가 작성한 리뷰 목록을 조회한다. (페이지네이션 가능)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "현재 페이지 수",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "페이지당 최대 항목 수",
+            "default": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllReviews"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/users/me/favorites": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "관심가게 조회",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "현재 페이지 수",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "페이지당 최대 항목 수",
+            "default": 5
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "내가 즐겨찾기한 가게 목록을 조회한다.",
+        "responses": {
+          "200": {
+            "description": "조회 성공"
+          },
+          "401": {
+            "description": "인증 필요"
+          },
+          "500": {
+            "description": "서버 에러"
+          }
+        }
+      }
+    },
+    "/users/{id}/role": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "(관리자) 유저 역할 변경 ([OWNER, CUSTOMER] 으로 변경)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "관리자가 사용자의 역할을 변경한다.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "user ID",
+            "default": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "description": "CUSTOMER, OWNER",
+                    "default": "OWNER"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "업데이트 성공, 혹은 업데이트 할 것이 없음"
+          },
+          "401": {
+            "description": "인증 오류"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "유저를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "(관리자) 유저 id 로 검색",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "user ID",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "유저 상세 불러오기 성공"
+          },
+          "401": {
+            "description": "인증 오류"
+          },
+          "403": {
+            "description": "권한 오류"
+          },
+          "404": {
+            "description": "유저를 찾을 수 없음"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

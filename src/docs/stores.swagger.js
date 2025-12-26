@@ -159,6 +159,18 @@
  *                type: integer
  *            description: 가게 ID
  *            default: 1
+ *          - in: query
+ *            name: page
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 1
+ *          - in: query
+ *            name: limit
+ *            required: false
+ *            schema:
+ *                type: integer
+ *            default: 5
  *      responses:
  *          200:
  *              description: ok 가게 예약들 조회 성공
