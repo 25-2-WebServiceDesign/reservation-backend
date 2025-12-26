@@ -152,7 +152,7 @@ exports.getStoreReservations = async (req, res, next) => {
     const limit = Number(req.query.limit) || 10;
     const order = req.query.order || "desc";
 
-    const result = await reservationsService.getStoreReservations(storeId, { page, limit, order });
+    const result = await reservationsService.getMyReservations(storeId, { page, limit, order });
 
     const reservations = result.reservations ?? result.data ?? result.rows ?? [];
 
