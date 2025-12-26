@@ -11,7 +11,7 @@ exports.getReviewById = async (req, res, next) => {
 
   try {
     const review = await reviewsService.getReviewById(id);
-    return res.status(200).json({review});
+    return res.status(200).json(new ApiResponse({review}));
   } catch (err) {
     return next(err);
   }
@@ -30,7 +30,7 @@ exports.updateMyReview = async (req, res, next) => {
   try {
 
     const updated = await reviewsService.updateMyReview(userId, id, req.body);
-    return res.status(200).json(updated);
+    return res.status(200).json(new ApiResponse({review: updated}));
   } catch (err) {
     return next(err);
   }
@@ -48,7 +48,7 @@ exports.deleteMyReview = async (req, res, next) => {
 
   try {
     const result = await reviewsService.deleteMyReview(userId, id);
-    return res.status(200).json(result);
+    return res.status(200).json(new ApiResponse(result));
   } catch (err) {
     return next(err);
   }
