@@ -162,15 +162,13 @@ exports.patchStore = async (storeId, data, user) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const updatedStore = storeRepo.update(id, patch, {transaction});
+    const updatedStore = await storeRepo.update(id, patch, {transaction});
     await transaction.commit()
     return updatedStore
   } catch(err){
     await transaction.rollback()
     throw(err)
   }
-
-  return storeRepo.update(id, patch);
 };
 
 exports.getStoreUnits = async (storeId, { page = 1, limit = 20, order = "desc" } = {}) => {

@@ -7,7 +7,7 @@ exports.createStore = async (req, res, next) => {
   try {
     const payload = { ...req.body, ownerId: req.user.id };
     const store = await storesService.createStore(payload);
-    res.status(201).json({store});
+    res.status(201).json(new ApiResponse({store}));
   } catch (err) {
     next(err);
   }
@@ -95,7 +95,7 @@ exports.patchStore = async (req, res, next) => {
       req.body,
       req.user
     );
-    return res.status(200).json(updated);
+    return res.status(200).json(new ApiResponse({store: updated}));
   } catch (err) {
     next(err);
   }

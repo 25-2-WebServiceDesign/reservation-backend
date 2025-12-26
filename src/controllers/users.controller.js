@@ -10,7 +10,7 @@ exports.getMe = async (req, res, next) => {
 
     try {
         const user = await usersService.getById(req.user.id);
-        return res.status(200).json(user);
+        return res.status(200).json(new ApiResponse({user}));
     } catch (err) {
         return next(err);
     }
@@ -29,7 +29,7 @@ exports.getUserById = async (req, res, next) => {
 
     try {
         const user = await usersService.getById(userId);
-        return res.status(200).json(user);
+        return res.status(200).json(new ApiResponse({user}));
     } catch(err) {
         return next(err);
     }
@@ -59,7 +59,7 @@ exports.updateMe = async (req, res, next) => {
       phone,
       profileImage,
     });
-    res.status(200).json(updated);
+    res.status(200).json(new ApiResponse({user: updated}));
   } catch (err) {
     next(err);
   }
@@ -104,7 +104,7 @@ exports.changeRole = async (req, res, next) => {
   // processing
   try {
     const data = await usersService.changeRole(userId, newRole);
-    res.status(200).json(new ApiResponse(data));
+    res.status(200).json(new ApiResponse({user: data}));
   } catch(err) {
     next(err);
   }
