@@ -8,6 +8,17 @@
  *     security:
  *       - bearerAuth: []
  *     description: 내 예약 목록을 조회한다.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: 조회 성공
@@ -52,7 +63,7 @@
  *     tags:
  *       - Reservations
  *     summary: 예약 수정/취소
- *     description: 예약 정보를 수정하거나 취소한다.
+ *     description: 예약 정보를 수정.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -68,7 +79,11 @@
  *         application/json:
  *           schema:
  *             type: object
- *             description: 수정/취소에 필요한 필드 전달 (예 - status, time 등)
+ *             properties:
+ *               headcount:
+ *                 type: integer
+ *               memo:
+ *                 type: string
  *     responses:
  *       200:
  *         description: 수정/취소 성공
