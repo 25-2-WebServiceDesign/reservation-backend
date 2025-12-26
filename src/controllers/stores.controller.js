@@ -1,6 +1,7 @@
 const storesService = require("../services/stores.service");
 const AppError = require("../responses/AppError");
 const ApiResponse = require("../responses/ApiResponse");
+const reservationsService = require("../services/reservations.service");
 
 exports.createStore = async (req, res, next) => {
   try {
@@ -144,18 +145,32 @@ exports.createStoreUnit = async (req, res, next) => {
 };
 
 exports.getStoreReservations = async (req, res, next) => {
-  const storeId = Number(req.params.id);
-  if (!Number.isInteger(storeId) || storeId <= 0) {
-    return next(new AppError("BAD_REQUEST", 400, "storeId is invalid"));
-  }
-
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 10);
-  const order = (req.query.order ?? "desc").toLowerCase(); // asc/desc
-
   try {
-    const data = await storesService.getStoreReservations(storeId, { page, limit, order });
-    return res.status(200).json(data);
+    const storeId = Number(req.params.id);
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const order = req.query.order || "desc";
+
+    const result = await reservationsService.getStoreReservations(storeId, { page, limit, order });
+
+    const reservations = result.reservations ?? result.data ?? result.rows ?? [];
+
+    const totalCount = result.totalCount ?? result.count ?? result.meta?.totalCount ?? 0;
+    const totalPage =
+      result.totalPage ??
+      result.meta?.totalPage ??
+      Math.ceil((totalCount || 0) / limit);
+
+    const sanitized = reservations.map((r) => {
+      const obj = r?.toJSON ? r.toJSON() : r;
+      const { storeId, ...rest } = obj;
+      return rest;
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse({ reservations: sanitized }, { page, limit, totalCount, totalPage }));
   } catch (err) {
     return next(err);
   }

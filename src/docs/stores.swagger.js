@@ -148,7 +148,7 @@
  *      tags:
  *          - Stores
  *      summary: 가게 예약 조회
- *      description: 가게의 예약을 조회한다. (OWNER & 소유자 혹은 그 이상의 사용자) - 추후 페이지네이션 적용 예정
+ *      description: 가게의 예약을 조회한다. (OWNER & 소유자)
  *      security:
  *          - bearerAuth: []
  *      parameters:
